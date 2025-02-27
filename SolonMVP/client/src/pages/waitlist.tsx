@@ -64,7 +64,7 @@ export default function Waitlist() {
         <div className="bg-muted p-6 rounded-lg text-left mb-8">
           <h2 className="text-2xl font-semibold mb-3">How It Works</h2>
           <ol className="space-y-3 list-decimal pl-5">
-            <li><span className="font-medium">Tokenization:</span> We transform shares from startups that Venture Capitals have invested in into tokens.</li>
+            <li><span className="font-medium">Tokenization:</span> We tokenize shares from emerging startups that well-known venture capitals have invested in.</li>
             <li><span className="font-medium">Trading Platform:</span> Our platform allows you to buy and sell these tokens, creating a liquid market for typically illiquid assets.</li>
             <li><span className="font-medium">Portfolio Management:</span> Track your investments and manage your portfolio of startup tokens all in one place.</li>
             <li><span className="font-medium">Early Access:</span> Join the waitlist now to be among the first to access this revolutionary platform.</li>

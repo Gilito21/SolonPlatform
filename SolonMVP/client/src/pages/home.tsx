@@ -23,7 +23,7 @@ const mockTokens = [
   },
   {
     name: "Stellar Dynamics | Battery Ventures",
-    symbol: "SD",
+    symbol: "STL",
     price: 12.80,
     change: 1.5,
     volume: "500K",
