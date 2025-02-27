@@ -278,33 +278,39 @@ export default function Portfolio() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {orders?.map((order: any) => (
-                <div
-                  key={order.id}
-                  className="flex items-center justify-between py-2 border-b last:border-0"
-                >
-                  <div>
-                    <span
-                      className={`font-medium ${
-                        order.type === "buy" ? "text-green-500" : "text-red-500"
-                      }`}
-                    >
-                      {order.type.toUpperCase()} {order.symbol}
-                    </span>
-                    <p className="text-sm text-muted-foreground">
-                      {format(new Date(order.timestamp), "MMM d, yyyy HH:mm")}
-                    </p>
+              {orders
+                ?.slice()
+                .sort(
+                  (a: any, b: any) =>
+                    new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+                )
+                .map((order: any) => (
+                  <div
+                    key={order.id}
+                    className="flex items-center justify-between py-2 border-b last:border-0"
+                  >
+                    <div>
+                      <span
+                        className={`font-medium ${
+                          order.type === "buy" ? "text-green-500" : "text-red-500"
+                        }`}
+                      >
+                        {order.type.toUpperCase()} {order.symbol}
+                      </span>
+                      <p className="text-sm text-muted-foreground">
+                        {format(new Date(order.timestamp), "MMM d, yyyy HH:mm")}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium">
+                        {order.amount} {order.symbol}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        @ ${parseFloat(order.price).toFixed(2)}
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-medium">
-                      {order.amount} {order.symbol}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      @ ${parseFloat(order.price).toFixed(2)}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                ))}
               {(!orders || orders.length === 0) && (
                 <p className="text-center text-muted-foreground py-4">
                   No transactions yet
