@@ -24,7 +24,7 @@ const tokens = {
     symbol: "QTE",
     description: "Next-generation quantum-resistant blockchain infrastructure."
   },
-  STD: {
+  STL: {
     name: "Stellar Dynamics | Battery Ventures",
     symbol: "STL",
     description: "Revolutionary DeFi platform powered by advanced stellar mechanics."
