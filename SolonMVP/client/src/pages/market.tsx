@@ -15,18 +15,18 @@ import { useState } from "react";
 // Mock token data - in a real app, this would come from an API
 const tokens = {
   NXP: {
-    name: "Nexus Protocol | Andreessen Quantum",
+    name: "Nexus Protocol | Andreessen Horowitz",
     symbol: "NXP",
     description: "A decentralized protocol for cross-chain communication and interoperability."
   },
   QTE: {
-    name: "Quantum Edge | Sequoia Frontiers",
+    name: "Quantum Edge | Sequoia Capital",
     symbol: "QTE",
     description: "Next-generation quantum-resistant blockchain infrastructure."
   },
   STD: {
-    name: "Stellar Dynamics | Galaxy Ventures",
-    symbol: "STD",
+    name: "Stellar Dynamics | Battery Ventures",
+    symbol: "STL",
     description: "Revolutionary DeFi platform powered by advanced stellar mechanics."
   },
   LAI: {
