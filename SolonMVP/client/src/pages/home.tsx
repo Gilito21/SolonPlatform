@@ -9,7 +9,7 @@ import { useState } from "react";
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: tokens = [], isLoading } = useQuery({
+  const { data: tokens = [], isLoading, error } = useQuery({
     queryKey: ["/api/prices/latest"],
     queryFn: async () => {
       const res = await fetch("/api/prices/latest");
@@ -17,6 +17,10 @@ export default function Home() {
       return res.json();
     },
   });
+
+  if (error) {
+    console.error("Error fetching token prices:", error);
+  }
 
   const filteredTokens = tokens.filter(token => 
     token.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -46,6 +50,8 @@ export default function Home() {
 
       {isLoading ? (
         <p>Loading...</p>
+      ) : error ? (
+        <p>Error loading token prices</p>
       ) : (
         <div className="grid gap-4">
           {filteredTokens.map((token) => (
