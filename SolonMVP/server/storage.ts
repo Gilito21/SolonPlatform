@@ -1,4 +1,6 @@
 import { type TokenPrice, type Order, type InsertOrder } from "@shared/schema";
+import path from 'path';
+import fs from 'fs';
 
 export interface IStorage {
   getLatestPrice(): Promise<TokenPrice>;
@@ -189,7 +191,10 @@ export class MemStorage implements IStorage {
       });
     }
 
-    // Send email
+    const logoPath = path.join(__dirname, '../client/src/pages/Solon_White_logo.png');
+    const logoData = fs.readFileSync(logoPath).toString('base64');
+
+    // Send email to admin
     const info = await transporter.sendMail({
       from: '"Waitlist Notifier" <waitlist@Solon.com>',
       to: PERSONAL_EMAIL,
@@ -209,6 +214,7 @@ export class MemStorage implements IStorage {
       `,
     });
 
+    // Send email to subscriber
     const info2 = await transporter.sendMail({
       from: '"Waitlist Notifier" <waitlist@Solon.com>',
       to: subscriberEmail,
@@ -216,34 +222,38 @@ export class MemStorage implements IStorage {
       text: `We will notify you as soon as Solon goes live: ${subscriberEmail}`,
       html: `
         <div style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 40px; text-align: center;">
-          <h1 style="color: #333; margin-bottom: 20px;">Welcome to Solon!</h1>
+          <h1 style="color: #333; margin-bottom: 20px;">Welcome to <img src="cid:solonLogo" alt="Solon Logo" style="height: 40px;" /></h1>
           <p style="font-size: 16px; color: #555; margin-bottom: 30px;">
             Thank you for joining our waitlist. We’re thrilled to have you on board!
           </p>
-
           <div style="background: #fff; padding: 20px; display: inline-block; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 30px;">
             <p style="font-size: 18px; margin: 0; word-wrap: break-word;">
               <strong>Your email:</strong> ${subscriberEmail}
             </p>
           </div>
-
           <p style="font-size: 14px; color: #888;">
             We’ll let you know as soon as Solon goes live. In the meantime, keep an eye out!
           </p>
-
           <!-- Optional button or call to action -->
           <a 
-            href="https://example.com" 
+            href="https://bba-01mw.onrender.com/" 
             style="display: inline-block; margin-top: 20px; padding: 12px 24px; background-color: #007BFF; color: #fff; border-radius: 4px; text-decoration: none; font-weight: bold;"
           >
             Visit Our Website
           </a>
-
           <p style="margin-top: 40px; font-size: 12px; color: #aaa;">
             This is an automated message from Solon. We’re excited to have you with us!
           </p>
         </div>
       `,
+      attachments: [
+        {
+          filename: 'Solon_White_logo.png',
+          content: logoData,
+          encoding: 'base64',
+          cid: 'solonLogo', // same cid value as in the html img src
+        },
+      ],
     });
 
     // If using ethereal email, log the preview URL
