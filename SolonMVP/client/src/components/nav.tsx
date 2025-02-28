@@ -1,5 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import logo from '../pages/Solon_White_logo.png';
 
 const navigation = [
   { name: "Home", href: "/home" },
@@ -19,7 +20,7 @@ export function Navigation() {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-4">
-            <span className="text-xl font-bold">Solon</span>
+            <img src={logo} alt="Solon Logo" className="h-10" />
             <div className="text-xs font-medium bg-muted/50 rounded-md px-2 py-0.5 flex items-center">
               <span className="opacity-70 mr-1">Cash:</span> ${portfolio?.balance?.toFixed(2) || "0.00"}
             </div>
