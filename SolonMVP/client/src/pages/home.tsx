@@ -6,58 +6,19 @@ import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 
-const mockTokens = [
-  {
-    name: "Nexus Protocol | Andreessen Horowitz",
-    symbol: "NXP",
-    price: 102.45,
-    change: 5.2,
-    volume: "1.2M",
-  },
-  {
-    name: "Quantum Edge | Sequoia Capital",
-    symbol: "QTE",
-    price: 45.30,
-    change: -2.1,
-    volume: "850K",
-  },
-  {
-    name: "Stellar Dynamics | Battery Ventures",
-    symbol: "STL",
-    price: 12.80,
-    change: 1.5,
-    volume: "500K",
-  },
-  {
-    name: "Luminary AI | Accel",
-    symbol: "LAI",
-    price: 78.45,
-    change: 3.2,
-    volume: "950K",
-  },
-  {
-    name: "Nova Finance | Lightspeed Alpha",
-    symbol: "NOV",
-    price: 34.20,
-    change: -1.8,
-    volume: "600K",
-  },
-  {
-    name: "Cipher Labs | Index Ventures",
-    symbol: "CIP",
-    price: 56.90,
-    change: 2.7,
-    volume: "750K",
-  }
-];
-
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Fixed portfolio value of $1000
-  const portfolio = { value: 1000 };
+  const { data: tokens = [], isLoading } = useQuery({
+    queryKey: ["/api/prices/latest"],
+    queryFn: async () => {
+      const res = await fetch("/api/prices/latest");
+      if (!res.ok) throw new Error("Failed to fetch token prices");
+      return res.json();
+    },
+  });
 
-  const filteredTokens = mockTokens.filter(token => 
+  const filteredTokens = tokens.filter(token => 
     token.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     token.symbol.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -83,43 +44,47 @@ export default function Home() {
         </Link>
       </div>
 
-      <div className="grid gap-4">
-        {filteredTokens.map((token) => (
-          <Card 
-            key={token.symbol} 
-            className="shadow-md hover:shadow-lg transition-shadow cursor-pointer"
-            onClick={() => window.location.href = `/market/${token.symbol.toLowerCase()}`}
-          >
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <Link href={`/market/${token.symbol.toLowerCase()}`} className="block flex-1 hover:opacity-75 transition-opacity">
-                  <div>
-                    <h2 className="text-lg font-semibold">{token.name.split(' | ')[0]}</h2>
-                    <p className="text-sm text-muted-foreground">
-                      {token.symbol}
-                    </p>
-                  </div>
-                </Link>
-                <div className="text-right">
-                  <p className="text-xl font-bold">${token.price}</p>
-                  <div className="flex items-center gap-1">
-                    {token.change >= 0 ? (
-                      <ArrowUpRight className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <ArrowDownRight className="h-4 w-4 text-red-500" />
-                    )}
-                    <span
-                      className={`text-sm font-medium ${token.change >= 0 ? "text-green-500" : "text-red-500"}`}
-                    >
-                      {Math.abs(token.change)}%
-                    </span>
+      {isLoading ? (
+        <p>Loading...</p>
+      ) : (
+        <div className="grid gap-4">
+          {filteredTokens.map((token) => (
+            <Card 
+              key={token.symbol} 
+              className="shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+              onClick={() => window.location.href = `/market/${token.symbol.toLowerCase()}`}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <Link href={`/market/${token.symbol.toLowerCase()}`} className="block flex-1 hover:opacity-75 transition-opacity">
+                    <div>
+                      <h2 className="text-lg font-semibold">{token.name.split(' | ')[0]}</h2>
+                      <p className="text-sm text-muted-foreground">
+                        {token.symbol}
+                      </p>
+                    </div>
+                  </Link>
+                  <div className="text-right">
+                    <p className="text-xl font-bold">${token.price}</p>
+                    <div className="flex items-center gap-1">
+                      {token.change >= 0 ? (
+                        <ArrowUpRight className="h-4 w-4 text-green-500" />
+                      ) : (
+                        <ArrowDownRight className="h-4 w-4 text-red-500" />
+                      )}
+                      <span
+                        className={`text-sm font-medium ${token.change >= 0 ? "text-green-500" : "text-red-500"}`}
+                      >
+                        {Math.abs(token.change)}%
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
