@@ -1,9 +1,9 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import logo from './Solon_White_logo.png';
 
 export default function Waitlist() {
   const [email, setEmail] = useState("");
@@ -57,7 +57,9 @@ export default function Waitlist() {
   return (
     <div className="container mx-auto p-4 flex flex-col items-center justify-center min-h-[80vh]">
       <div className="max-w-3xl text-center mb-8">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Solon</h1>
+        <h1 className="text-4xl font-bold mb-4">
+          Welcome to <img src={logo} alt="Solon Logo" className="inline h-10" />
+        </h1>
         <p className="text-xl mb-6">
           The first platform that transforms shares from startups backed by prestigious Venture Capitals into tradable tokens.
         </p>
