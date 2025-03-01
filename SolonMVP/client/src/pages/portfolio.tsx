@@ -12,20 +12,11 @@ import {
   ZAxis, // Import ZAxis
   Label, // Import Label
   Cell,
+  BarChart,
+  Bar,
 } from "recharts";
-import { ErrorBoundary } from 'react-error-boundary';
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8", "#82ca9d"];
-
-function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) {
-  return (
-    <div role="alert">
-      <p>Something went wrong:</p>
-      <pre>{error.message}</pre>
-      <button onClick={resetErrorBoundary}>Try again</button>
-    </div>
-  )
-}
 
 export default function Portfolio() {
   const queryClient = useQueryClient();
@@ -157,143 +148,136 @@ export default function Portfolio() {
   }
 
   return (
-    <ErrorBoundary
-      FallbackComponent={ErrorFallback}
-      onReset={() => {
-        // Reset the state of the app
-        queryClient.resetQueries();
-      }}
-    >
-      <div>
-        {/* Spacer div to prevent overlap with the header */}
-        <div style={{ height: '60px' }}></div>
-      
-      <div className="container mx-auto p-4 max-w-4xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">My Portfolio</h1>
-          <p className="text-muted-foreground">
-            View your token holdings and transaction history
-          </p>
-        </div>
+    <div>
+      {/* Spacer div to prevent overlap with the header */}
+      <div style={{ height: '60px' }}></div>
+    
+    <div className="container mx-auto p-4 max-w-4xl">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">My Portfolio</h1>
+        <p className="text-muted-foreground">
+          View your token holdings and transaction history
+        </p>
+      </div>
 
-        <div className="grid gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Holdings</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Cash Balance:</span>
-                  <span className="text-xl font-medium">
-                    ${portfolio?.balance?.toFixed(2) || "0.00"}
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Token Value:</span>
-                  <span className="text-xl font-medium">
-                    {(
-                      Object.entries(tokenQuantities).reduce(
-                        (sum, [_, quantity]) => sum + quantity * currentPrice,
-                        0
-                      ) ?? 0
-                    ).toFixed(2)}
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center border-t border-gray-200 pt-2 mt-2">
-                  <span className="text-muted-foreground font-medium">
-                    Total Portfolio Value:
-                  </span>
-                  <span className="text-xl font-bold text-primary">
-                    {(
-                      (portfolio?.balance || 0) +
-                      Object.entries(tokenQuantities).reduce(
-                        (sum, [_, quantity]) => sum + quantity * currentPrice,
-                        0
-                      )
-                    ).toFixed(2)}
-                  </span>
-                </div>
+      <div className="grid gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Holdings</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Cash Balance:</span>
+                <span className="text-xl font-medium">
+                  ${portfolio?.balance?.toFixed(2) || "0.00"}
+                </span>
               </div>
-            </CardContent>
-          </Card>
 
-          {/* Bubble Chart (Distribution) */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Portfolio Distribution</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[400px] w-full">
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Token Value:</span>
+                <span className="text-xl font-medium">
+                  {(
+                    Object.entries(tokenQuantities).reduce(
+                      (sum, [_, quantity]) => sum + quantity * currentPrice,
+                      0
+                    ) ?? 0
+                  ).toFixed(2)}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center border-t border-gray-200 pt-2 mt-2">
+                <span className="text-muted-foreground font-medium">
+                  Total Portfolio Value:
+                </span>
+                <span className="text-xl font-bold text-primary">
+                  {(
+                    (portfolio?.balance || 0) +
+                    Object.entries(tokenQuantities).reduce(
+                      (sum, [_, quantity]) => sum + quantity * currentPrice,
+                      0
+                    )
+                  ).toFixed(2)}
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Bubble Chart (Distribution) */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Portfolio Distribution</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[400px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <ScatterChart margin={{ top: 20, right: 20, bottom: 30, left: 30 }}>
+                  <XAxis type="number" dataKey="x" name="X" unit="" tick={false} />
+                  <YAxis type="number" dataKey="y" name="Y" unit="" tick={false} />
+                  <ZAxis type="number" dataKey="value" name="Value" range={[100, sizeFactor]} />
+                  <Tooltip
+                    formatter={(value: any, name: any, props: any) => {
+                      if (name === "value") {
+                        return [`$${value.toFixed(2)}`, "Value"];
+                      }
+                      if (name === "quantity") {
+                        return [props.payload.quantity.toFixed(2), "Quantity"];
+                      }
+                      return value;
+                    }}
+                    labelFormatter={(label: any) => `Token: ${label}`}
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--background))",
+                      border: "1px solid hsl(var(--border))",
+                    }}
+                  />
+                  <Legend />
+                  <Scatter
+                    name="Tokens"
+                    data={portfolioDataBubble}
+                    fill="#8884d8"
+                    shape="circle"
+                  >
+                    {portfolioDataBubble.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                    <Label
+                      dataKey="label"
+                      position="inside"
+                      fill="#000"
+                      fontSize={12}
+                      fontWeight="bold"
+                    />
+                  </Scatter>
+                </ScatterChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* NEW: Bar Chart (Cost Basis vs Current Value) */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Cost vs Market Value</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {costValueData.length > 0 ? (
+              <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <ScatterChart margin={{ top: 20, right: 20, bottom: 30, left: 30 }}>
-                    <XAxis type="number" dataKey="x" name="X" unit="" tick={false} />
-                    <YAxis type="number" dataKey="y" name="Y" unit="" tick={false} />
-                    <ZAxis type="number" dataKey="value" name="Value" range={[100, sizeFactor]} />
+                  <BarChart data={costValueData}>
+                    <XAxis dataKey="symbol" />
+                    <YAxis />
                     <Tooltip
-                      formatter={(value: any, name: any, props: any) => {
-                        if (name === "value") {
-                          return [`$${value.toFixed(2)}`, "Value"];
-                        }
-                        if (name === "quantity") {
-                          return [props.payload.quantity.toFixed(2), "Quantity"];
-                        }
-                        return value;
-                      }}
-                      labelFormatter={(label: any) => `Token: ${label}`}
+                      formatter={(value, name) =>
+                        name === "difference"
+                          ? [`$${(value as number).toFixed(2)}`, "Profit/Loss"]
+                          : [`$${(value as number).toFixed(2)}`, name]
+                      }
                       contentStyle={{
                         backgroundColor: "hsl(var(--background))",
                         border: "1px solid hsl(var(--border))",
                       }}
-                    />
-                    <Legend />
-                    <Scatter
-                      name="Tokens"
-                      data={portfolioDataBubble}
-                      fill="#8884d8"
-                      shape="circle"
-                    >
-                      {portfolioDataBubble.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                      <Label
-                        dataKey="label"
-                        position="inside"
-                        fill="#000"
-                        fontSize={12}
-                        fontWeight="bold"
-                      />
-                    </Scatter>
-                  </ScatterChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* NEW: Bar Chart (Cost Basis vs Current Value) */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Cost vs Market Value</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {costValueData.length > 0 ? (
-                <div className="h-[300px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={costValueData}>
-                      <XAxis dataKey="symbol" />
-                      <YAxis />
-                      <Tooltip
-                        formatter={(value, name) =>
-                          name === "difference"
-                            ? [`$${(value as number).toFixed(2)}`, "Profit/Loss"]
-                            : [`$${(value as number).toFixed(2)}`, name]
-                        }
-                        contentStyle={{
-                          backgroundColor: "hsl(var(--background))",
-                          border: "1px solid hsl(var(--border))",
-                        }}
                     />
                     <Legend />
                     <Bar dataKey="cost" fill="#8884d8" name="Total Cost" />
@@ -395,6 +379,5 @@ export default function Portfolio() {
       </div>
       </div>
     </div>
-    </ErrorBoundary>
   );
 }
