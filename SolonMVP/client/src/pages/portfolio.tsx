@@ -10,7 +10,6 @@ import {
   Legend,
   ResponsiveContainer,
   ZAxis, // Import ZAxis
-  Label, // Import Label
   Cell,
   BarChart,
   Bar,
@@ -131,7 +130,7 @@ export default function Portfolio() {
       color: COLORS[index % COLORS.length],
       x: (index + 1) / (Object.keys(tokenQuantities).length + 1),
       y: 0.5,
-      label: `${symbol} (${quantity.toFixed(2)})`, // Label with token name and quantity
+      // label: `${symbol} (${quantity.toFixed(2)})`, // Label with token name and quantity
     }));
 
   // Adjust bubble size based on the number of bubbles
@@ -146,6 +145,20 @@ export default function Portfolio() {
   if (portfolioError || ordersError || priceError) {
     return <div>Error loading data.</div>;
   }
+
+  const CustomLegend = (props: any) => {
+    const { payload } = props;
+
+    return (
+      <ul>
+        {payload.map((entry: any, index: number) => (
+          <li key={`item-${index}`} style={{ color: entry.color }}>
+            {entry.value}
+          </li>
+        ))}
+      </ul>
+    );
+  };
 
   return (
     <div>
@@ -212,7 +225,9 @@ export default function Portfolio() {
           <CardContent>
             <div className="h-[400px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <ScatterChart margin={{ top: 20, right: 20, bottom: 30, left: 30 }}>
+                <ScatterChart margin={{ top: 20, right: 20, bottom: 30, left: 30 }}
+                  onMouseOver={() => { }}
+                >
                   <XAxis type="number" dataKey="x" name="X" unit="" tick={false} domain={[0, 1]}/>
                   <YAxis type="number" dataKey="y" name="Y" unit="" tick={false} domain={[0, 1]}/>
                   <ZAxis type="number" dataKey="value" name="Value" range={[100, sizeFactor]} />
@@ -232,7 +247,7 @@ export default function Portfolio() {
                       border: "1px solid hsl(var(--border))",
                     }}
                   />
-                  <Legend />
+                  <Legend content={CustomLegend} />
                   <Scatter
                     name="Tokens"
                     data={portfolioDataBubble}
@@ -242,13 +257,6 @@ export default function Portfolio() {
                     {portfolioDataBubble.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
-                    <Label
-                      dataKey="label"
-                      position="inside"
-                      fill="#000"
-                      fontSize={12}
-                      fontWeight="bold"
-                    />
                   </Scatter>
                 </ScatterChart>
               </ResponsiveContainer>
