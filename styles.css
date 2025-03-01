@@ -21,13 +21,10 @@ header {
   margin-top: 10px;
 }
 
-nav {
-  margin-top: 20px;
-}
 
 /* Add padding to the top of the main content to account for the fixed header */
 .main-content {
-  padding-top: 70px; /* Adjust this value based on the height of your header */
+  padding-top: 60px; /* Adjust this value based on the height of your header */
 }
 
 /* Desktop styles */

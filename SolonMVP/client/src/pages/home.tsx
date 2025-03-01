@@ -4,13 +4,13 @@ import { Link } from "wouter";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query"; // Importing useQuery for portfolio data
+import { useQuery } from "@tanstack/react-query";
+
+interface LatestPrice {
+  price: string;
+}
 
 export default function Home() {
-  interface LatestPrice {
-    price: string;
-  }
-
   const { data: portfolio } = useQuery({
     queryKey: ["/api/portfolio"],
   });
