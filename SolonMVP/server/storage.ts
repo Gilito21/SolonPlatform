@@ -247,9 +247,8 @@ export class MemStorage implements IStorage {
           </p>
         </div>
       `
-      
     });
-
+    // Optimize
     // If using ethereal email, log the preview URL
     if (!SMTP_USER || !SMTP_PASS) {
       console.log(
