@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
 import {
@@ -17,11 +17,13 @@ import {
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8", "#82ca9d"];
 
 export default function Portfolio() {
-  const { data: portfolio, isLoading: portfolioLoading } = useQuery<{ balance: number }>({
+  const queryClient = useQueryClient();
+
+  const { data: portfolio, isLoading: portfolioLoading, error: portfolioError } = useQuery<{ balance: number }>({
     queryKey: ["/api/portfolio"],
   });
 
-  const { data: orders, isLoading: ordersLoading } = useQuery<any[]>({
+  const { data: orders, isLoading: ordersLoading, error: ordersError } = useQuery<any[]>({
     queryKey: ["/api/orders"],
   });
 
@@ -71,7 +73,7 @@ export default function Portfolio() {
 
   // Get latest price to calculate current token values
   // (In a real app, you'd likely have a price per token.)
-  const { data: latestPrice, isLoading: priceLoading } = useQuery<{ price: string }>({
+  const { data: latestPrice, isLoading: priceLoading, error: priceError } = useQuery<{ price: string }>({
     queryKey: ["/api/prices/latest"],
   });
   const currentPrice = parseFloat(latestPrice?.price || "0");
@@ -128,6 +130,10 @@ export default function Portfolio() {
 
   if (portfolioLoading || ordersLoading || priceLoading) {
     return <div>Loading...</div>;
+  }
+
+  if (portfolioError || ordersError || priceError) {
+    return <div>Error loading data.</div>;
   }
 
   return (
