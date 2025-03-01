@@ -63,7 +63,9 @@ export default function Waitlist() {
         <div className="max-w-3xl text-center mb-8">
           <h1 className="text-4xl font-bold mb-4 flex items-center justify-center space-x-4">
             <span>Welcome to</span>
-            <img src={logo} alt="Solon Logo" className="inline h-10" />
+          </h1>
+          <img src={logo} alt="Solon Logo" className="inline h-10" />
+          <h1>
           </h1>
         </div>
         <Card className="w-full max-w-md mx-auto mb-8">

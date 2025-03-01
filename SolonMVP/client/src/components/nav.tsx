@@ -24,7 +24,7 @@ export function Navigation() {
               <img src={logo} alt="Solon Logo" className="h-8" />
             </Link>
           </div>
-          <div className="flex gap-8 justify-center">
+          <div className="flex gap-4 justify-center">
             {navigation.map((item) => (
               <Link
                 key={item.name}
