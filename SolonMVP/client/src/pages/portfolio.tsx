@@ -10,8 +10,7 @@ import {
   Legend,
   ResponsiveContainer,
   ZAxis, // Import ZAxis
-  BarChart,
-  Bar,
+  Label, // Import Label
   Cell,
 } from "recharts";
 
@@ -119,7 +118,13 @@ export default function Portfolio() {
       color: COLORS[index % COLORS.length],
       x: Math.random(), // Random X position for distribution
       y: Math.random(), // Random Y position for distribution
+      label: `${symbol} (${quantity.toFixed(2)})`, // Label with token name and quantity
     }));
+
+  // Adjust bubble size based on the number of bubbles
+  const bubbleCount = portfolioDataBubble.length;
+  const baseSize = 5000; // Adjust this value to change the base size
+  const sizeFactor = baseSize / (bubbleCount || 1); // Ensure no division by zero
 
   if (portfolioLoading || ordersLoading || priceLoading) {
     return <div>Loading...</div>;
@@ -193,7 +198,7 @@ export default function Portfolio() {
                 <ScatterChart margin={{ top: 20, right: 20, bottom: 30, left: 30 }}>
                   <XAxis type="number" dataKey="x" name="X" unit="" tick={false} />
                   <YAxis type="number" dataKey="y" name="Y" unit="" tick={false} />
-                  <ZAxis type="number" dataKey="value" name="Value" />
+                  <ZAxis type="number" dataKey="value" name="Value" range={[100, sizeFactor]} />
                   <Tooltip
                     formatter={(value: any, name: any, props: any) => {
                       if (name === "value") {
@@ -220,6 +225,13 @@ export default function Portfolio() {
                     {portfolioDataBubble.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
+                    <Label
+                      dataKey="label"
+                      position="inside"
+                      fill="#000"
+                      fontSize={12}
+                      fontWeight="bold"
+                    />
                   </Scatter>
                 </ScatterChart>
               </ResponsiveContainer>
