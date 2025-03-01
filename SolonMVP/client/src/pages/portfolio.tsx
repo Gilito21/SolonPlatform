@@ -2,32 +2,32 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
 import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Legend,
-  Tooltip,
-  BarChart,
-  Bar,
+  ScatterChart,
+  Scatter,
   XAxis,
   YAxis,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  ZAxis, // Import ZAxis
+  BarChart,
+  Bar,
 } from "recharts";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8", "#82ca9d"];
 
 export default function Portfolio() {
-  const { data: portfolio } = useQuery({
+  const { data: portfolio } = useQuery<{ balance: number }>({
     queryKey: ["/api/portfolio"],
   });
 
-  const { data: orders } = useQuery({
+  const { data: orders } = useQuery<any[]>({
     queryKey: ["/api/orders"],
   });
 
   // Calculate token quantities from orders
-  const tokenQuantities =
-    orders?.reduce((acc: Record<string, number>, order: any) => {
+  const tokenQuantities: Record<string, number> =
+    orders?.reduce((acc: Record<string, number>, order: { symbol: string; amount: string; type: string; }) => {
       const amount = parseFloat(order.amount);
       if (!acc[order.symbol]) {
         acc[order.symbol] = 0;
@@ -48,7 +48,7 @@ export default function Portfolio() {
   orders?.forEach((order: any) => {
     const symbol = order.symbol;
     const amount = parseFloat(order.amount);
-    const price = parseFloat(order.price);
+    const price = parseFloat(order.price || "0");
 
     if (!tokenCostData[symbol]) {
       tokenCostData[symbol] = {
@@ -71,7 +71,7 @@ export default function Portfolio() {
 
   // Get latest price to calculate current token values
   // (In a real app, you'd likely have a price per token.)
-  const { data: latestPrice } = useQuery({
+  const { data: latestPrice } = useQuery<{ price: string }>({
     queryKey: ["/api/prices/latest"],
   });
   const currentPrice = parseFloat(latestPrice?.price || "0");
@@ -107,6 +107,18 @@ export default function Portfolio() {
         difference: currentVal - t.cost,
       };
     });
+
+  // Prepare data for the bubble chart
+  const portfolioDataBubble = Object.entries(tokenQuantities)
+    .filter(([_, quantity]) => quantity > 0) // Show only tokens with positive quantities
+    .map(([symbol, quantity], index) => ({
+      name: symbol,
+      value: quantity * currentPrice, // Bubble size based on token value
+      quantity: quantity, // Store quantity for tooltip
+      color: COLORS[index % COLORS.length],
+      x: Math.random(), // Random X position for distribution
+      y: Math.random(), // Random Y position for distribution
+    }));
 
   return (
     <div>
@@ -165,39 +177,46 @@ export default function Portfolio() {
           </CardContent>
         </Card>
 
-        {/* Pie Chart (Distribution) */}
+        {/* Bubble Chart (Distribution) */}
         <Card>
           <CardHeader>
             <CardTitle>Portfolio Distribution</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[300px] w-full">
+            <div className="h-[400px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={portfolioData}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={80}
-                    label={({ name, percent }) =>
-                      `${name} ${(percent * 100).toFixed(0)}%`
-                    }
-                  >
-                    {portfolioData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
+                <ScatterChart margin={{ top: 20, right: 20, bottom: 30, left: 30 }}>
+                  <XAxis type="number" dataKey="x" name="X" unit="" tick={false} />
+                  <YAxis type="number" dataKey="y" name="Y" unit="" tick={false} />
+                  <ZAxis type="number" dataKey="value" name="Value" />
                   <Tooltip
-                    formatter={(value: number) => [`$${value.toFixed(2)}`, "Value"]}
+                    formatter={(value: any, name: any, props: any) => {
+                      if (name === "value") {
+                        return [`$${value.toFixed(2)}`, "Value"];
+                      }
+                      if (name === "quantity") {
+                        return [props.payload.quantity.toFixed(2), "Quantity"];
+                      }
+                      return value;
+                    }}
+                    labelFormatter={(label: any) => `Token: ${label}`}
                     contentStyle={{
                       backgroundColor: "hsl(var(--background))",
                       border: "1px solid hsl(var(--border))",
                     }}
                   />
                   <Legend />
-                </PieChart>
+                  <Scatter
+                    name="Tokens"
+                    data={portfolioDataBubble}
+                    fill="#8884d8"
+                    shape="circle"
+                  >
+                    {portfolioDataBubble.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Scatter>
+                </ScatterChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
@@ -261,7 +280,7 @@ export default function Portfolio() {
                       </div>
                       <div className="flex flex-col items-end">
                         <span className="text-base">
-                          {quantity.toFixed(2)} tokens
+                          {(quantity as number).toFixed(2)} tokens
                         </span>
                         <span className="text-sm text-muted-foreground">
                           ${(quantity * currentPrice).toFixed(2)}
@@ -315,7 +334,7 @@ export default function Portfolio() {
                     </div>
                   </div>
                 ))}
-              {(!orders || orders.length === 0) && (
+              {(!orders || (orders as any[]).length === 0) && (
                 <p className="text-center text-muted-foreground py-4">
                   No transactions yet
                 </p>
