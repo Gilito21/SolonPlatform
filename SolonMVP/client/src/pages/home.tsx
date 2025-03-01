@@ -4,7 +4,6 @@ import { Link } from "wouter";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query"; // Importing useQuery for portfolio data
 
 export default function Home() {
@@ -12,11 +11,14 @@ export default function Home() {
     price: string;
   }
 
-  const { data: latestPrice } = useQuery<LatestPrice>({
-  const { data: portfolio } = useQuery({
-    queryKey: ["/api/portfolio"],
-    queryKey: ["/api/prices/latest"],
-  });
+const { data: latestPrice } = useQuery<LatestPrice>({
+  queryKey: ["/api/prices/latest"],
+});
+
+const { data: portfolio } = useQuery({
+  queryKey: ["/api/portfolio"],
+});
+
 
   const mockTokens = [
     {
