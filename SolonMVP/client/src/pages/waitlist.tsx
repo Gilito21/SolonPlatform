@@ -58,7 +58,7 @@ export default function Waitlist() {
     <div>
       {/* Spacer div to prevent overlap with the header */}
       <div style={{ height: '60px' }}></div>
-        <div className="main-content container mx-auto p-4 flex flex-col items-center justify-center min-h-[80vh] bg-black text-white">
+        <div className="main-content container mx-auto p-4 flex flex-col items-center justify-center min-h-[80vh] text-white">
 
         <div className="max-w-3xl text-center mb-8">
           <h1 className="text-4xl font-bold mb-4 flex items-center justify-center space-x-4">
