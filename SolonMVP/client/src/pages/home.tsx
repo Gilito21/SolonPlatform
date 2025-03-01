@@ -69,7 +69,7 @@ export default function Home() {
   return (
     <div className="container mx-auto p-4 max-w-4xl">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">Token Market</h1>
+        <h1 className="text-3xl font-bold mb-2">Token Market <span className="text-lg">cash:1000</span></h1>
         <p className="text-muted-foreground">
           Explore and trade the most innovative startups in the ecosystem, backed by world renowned Venture Capitals
         </p>

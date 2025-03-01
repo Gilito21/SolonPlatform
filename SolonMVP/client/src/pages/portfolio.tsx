@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
 import {
@@ -27,7 +27,7 @@ export default function Portfolio() {
 
   // Calculate token quantities from orders
   const tokenQuantities =
-    orders?.reduce((acc: Record<string, number>, order: any) => {
+    orders?.reduce((acc: Record<string, number>, order: { amount: string; symbol: string; type: string; }) => {
       const amount = parseFloat(order.amount);
       if (!acc[order.symbol]) {
         acc[order.symbol] = 0;
@@ -38,14 +38,12 @@ export default function Portfolio() {
     }, {}) || {};
 
   // (New) Calculate net cost (for cost basis)
-  // We'll track total cost in 'tokenCostData[symbol].cost'
-  // and net quantity in 'tokenCostData[symbol].quantity'
   const tokenCostData: Record<
     string,
     { symbol: string; cost: number; quantity: number }
   > = {};
 
-  orders?.forEach((order: any) => {
+  orders?.forEach((order: { symbol: string; amount: string; price: string; type: string; }) => {
     const symbol = order.symbol;
     const amount = parseFloat(order.amount);
     const price = parseFloat(order.price);
@@ -63,20 +61,18 @@ export default function Portfolio() {
       tokenCostData[symbol].cost += costChange;
       tokenCostData[symbol].quantity += amount;
     } else {
-      // For sells, subtract cost and reduce quantity
       tokenCostData[symbol].cost -= costChange;
       tokenCostData[symbol].quantity -= amount;
     }
   });
 
   // Get latest price to calculate current token values
-  // (In a real app, you'd likely have a price per token.)
-  const { data: latestPrice } = useQuery({
+  const { data: latestPrice }: UseQueryResult<{ price: string }> = useQuery({
     queryKey: ["/api/prices/latest"],
   });
   const currentPrice = parseFloat(latestPrice?.price || "0");
 
-  // 1) Convert to PieChart data (as before)
+  // Convert to PieChart data
   const tokenBalances = Object.entries(tokenQuantities).reduce(
     (acc: Record<string, number>, [symbol, quantity]) => {
       acc[symbol] = quantity * currentPrice;
@@ -93,17 +89,15 @@ export default function Portfolio() {
       color: COLORS[index % COLORS.length],
     }));
 
-  // 2) Build data for the Cost-vs-Current-Value comparison chart
-  //    We'll only include tokens with a positive quantity
+  // Build data for the Cost-vs-Current-Value comparison chart
   const costValueData = Object.values(tokenCostData)
-    .filter((t) => t.quantity > 0) // Only show net holdings > 0
-    .map((t, index) => {
+    .filter((t) => t.quantity > 0)
+    .map((t) => {
       const currentVal = t.quantity * currentPrice;
       return {
         symbol: t.symbol,
         cost: t.cost,
         currentValue: currentVal,
-        // difference: positive means gain, negative means loss
         difference: currentVal - t.cost,
       };
     });
@@ -208,7 +202,7 @@ export default function Portfolio() {
             {costValueData.length > 0 ? (
               <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={costValueData}>
+                  <BarChart data={costValueData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                     <XAxis dataKey="symbol" />
                     <YAxis />
                     <Tooltip
