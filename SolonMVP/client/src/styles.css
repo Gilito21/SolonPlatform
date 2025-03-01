@@ -6,7 +6,7 @@ body {
 
 header {
   background-color: #f8f9fa;
-  padding: 10px;
+  padding: 5px; /* Reduced padding for better visibility on mobile */
   text-align: center;
 }
 
@@ -15,11 +15,14 @@ header {
 }
 
 nav {
-  margin-top: 20px;
+  margin-top: 10px; /* Reduced margin for better visibility on mobile */
 }
 
 /* Add media queries for mobile optimization */
 @media (max-width: 768px) {
+  header {
+    padding: 5px; /* Ensure padding is minimal for mobile */
+  }
   header {
     display: flex;
     flex-direction: column;
@@ -40,10 +43,11 @@ nav {
     flex-direction: column;
     align-items: center;
     width: 100%;
+    padding: 0; /* Ensure no extra padding for mobile */
   }
 
   nav a {
-    padding: 10px;
+    padding: 8px; /* Reduced padding for better visibility on mobile */
     width: 100%;
     text-align: center;
   }
