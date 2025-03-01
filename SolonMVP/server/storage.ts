@@ -204,7 +204,7 @@ export class MemStorage implements IStorage {
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 5px;">
           <h2 style="color: #333; text-align: center;">New Waitlist Signup!</h2>
           <p style="font-size: 16px; line-height: 1.5;">Someone new has joined your waitlist:</p>
-          <div style="background-color: #f5f5f5; padding: 15px; border-radius: 4px; margin: 20px 0;">
+          <div style="background-color:rgb(3, 11, 61); padding: 15px; border-radius: 4px; margin: 20px 0;">
             <p style="font-size: 18px; font-weight: bold; margin: 0; word-break: break-all;">${subscriberEmail}</p>
           </div>
           <p style="font-size: 14px; color: #777; text-align: center; margin-top: 30px;">
@@ -221,8 +221,8 @@ export class MemStorage implements IStorage {
       subject: "Thank you for joining our waitlist 🚀",
       text: `We will notify you as soon as Solon goes live: ${subscriberEmail}`,
       html: `
-        <div style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 40px; text-align: center;">
-          <h1 style="color: #333; margin-bottom: 20px;">Welcome to <img src="cid:solonLogo" alt="Solon Logo" style="height: 40px;" /></h1>
+        <div style="font-family: Arial, sans-serif; background-color:rgb(3, 11, 61); padding: 40px; text-align: center;">
+          <h1 style="color: #333; margin-bottom: 20px;">Welcome to Solon: the world's best secondary market for private companies</h1>
           <p style="font-size: 16px; color: #555; margin-bottom: 30px;">
             Thank you for joining our waitlist. We’re thrilled to have you on board!
           </p>
@@ -245,15 +245,8 @@ export class MemStorage implements IStorage {
             This is an automated message from Solon. We’re excited to have you with us!
           </p>
         </div>
-      `,
-      attachments: [
-        {
-          filename: 'Solon_White_logo.png',
-          content: logoData,
-          encoding: 'base64',
-          cid: 'solonLogo', // same cid value as in the html img src
-        },
-      ],
+      `
+      
     });
 
     // If using ethereal email, log the preview URL
