@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "components/ui/card";
 import { format } from "date-fns";
 import {
   ScatterChart,
@@ -9,10 +9,11 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  ZAxis, // Import ZAxis
+  ZAxis,
   Cell,
   BarChart,
   Bar,
+  Label,
 } from "recharts";
 import { useEffect, useRef, useState } from "react";
 
@@ -27,13 +28,25 @@ interface BubbleData {
   y: number;
 }
 
+interface PortfolioData {
+  balance: number;
+}
+
+interface Order {
+  symbol: string;
+  amount: string;
+  type: string;
+  price: string;
+  timestamp: string;
+}
+
 const calculateBubblePositions = (
   bubbleData: BubbleData[],
   chartWidth: number,
   chartHeight: number
 ) => {
   const numBubbles = bubbleData.length;
-  const radius = Math.min(chartWidth, chartHeight) / 4; // Radius of the "imaginary" circle
+  const radius = Math.min(chartWidth, chartHeight) / 4;
   const centerX = chartWidth / 2;
   const centerY = chartHeight / 2;
 
@@ -44,8 +57,8 @@ const calculateBubblePositions = (
 
     return {
       ...bubble,
-      x: x / chartWidth, // Normalize X
-      y: y / chartHeight, // Normalize Y
+      x: x / chartWidth,
+      y: y / chartHeight,
     };
   });
 
@@ -55,41 +68,23 @@ const calculateBubblePositions = (
 export default function Portfolio() {
   const queryClient = useQueryClient();
 
-  const { data: portfolio, isLoading: portfolioLoading, error: portfolioError } = useQuery<{ balance: number }>({
-    queryKey: ["/api/portfolio"],
-    onError: (error) => {
-      console.error("Error fetching portfolio:", error);
-    },
-  });
+  const { data: portfolio, isLoading: portfolioLoading, error: portfolioError } = useQuery<PortfolioData>(["/api/portfolio"]);
 
-  const { data: orders, isLoading: ordersLoading, error: ordersError } = useQuery<any[]>({
-    queryKey: ["/api/orders"],
-    onError: (error) => {
-      console.error("Error fetching orders:", error);
-    },
-  });
+  const { data: orders, isLoading: ordersLoading, error: ordersError } = useQuery<Order[]>(["/api/orders"]);
 
-  // Calculate token quantities from orders
   const tokenQuantities: Record<string, number> =
-    orders?.reduce((acc: Record<string, number>, order: { symbol: string; amount: string; type: string; }) => {
+    orders?.reduce((acc: Record<string, number>, order: Order) => {
       const amount = parseFloat(order.amount);
       if (!acc[order.symbol]) {
         acc[order.symbol] = 0;
       }
-      // Track the actual token quantities
       acc[order.symbol] += order.type === "buy" ? amount : -amount;
       return acc;
     }, {}) || {};
 
-  // (New) Calculate net cost (for cost basis)
-  // We'll track total cost in 'tokenCostData[symbol].cost'
-  // and net quantity in 'tokenCostData[symbol].quantity'
-  const tokenCostData: Record<
-    string,
-    { symbol: string; cost: number; quantity: number }
-  > = {};
+  const tokenCostData: Record<string, { symbol: string; cost: number; quantity: number }> = {};
 
-  orders?.forEach((order: any) => {
+  orders?.forEach((order: Order) => {
     const symbol = order.symbol;
     const amount = parseFloat(order.amount);
     const price = parseFloat(order.price || "0");
@@ -107,22 +102,14 @@ export default function Portfolio() {
       tokenCostData[symbol].cost += costChange;
       tokenCostData[symbol].quantity += amount;
     } else {
-      // For sells, subtract cost and reduce quantity
       tokenCostData[symbol].cost -= costChange;
       tokenCostData[symbol].quantity -= amount;
     }
   });
 
-  // Get latest price to calculate current token values
-  const { data: latestPrice, isLoading: priceLoading, error: priceError } = useQuery<{ price: string }>({
-    queryKey: ["/api/prices/latest"],
-    onError: (error) => {
-      console.error("Error fetching latest price:", error);
-    },
-  });
+  const { data: latestPrice, isLoading: priceLoading, error: priceError } = useQuery<{ price: string }>(["/api/prices/latest"]);
   const currentPrice = parseFloat(latestPrice?.price || "0");
 
-  // Prepare data for the bubble chart
   const initialBubbleData: BubbleData[] = Object.entries(tokenQuantities)
     .filter(([_, quantity]) => quantity > 0)
     .map(([symbol, quantity], index) => ({
@@ -130,8 +117,8 @@ export default function Portfolio() {
       value: quantity * currentPrice,
       quantity: quantity,
       color: COLORS[index % COLORS.length],
-      x: 0, // Dummy value, will be calculated later
-      y: 0, // Dummy value, will be calculated later
+      x: 0,
+      y: 0,
     }));
 
   const [bubbleData, setBubbleData] = useState<BubbleData[]>(initialBubbleData);
@@ -140,7 +127,6 @@ export default function Portfolio() {
   useEffect(() => {
     if (portfolioLoading || ordersLoading || priceLoading) return;
 
-    // Calculate bubble positions when data is loaded
     if (chartRef.current) {
       const chartWidth = chartRef.current.offsetWidth;
       const chartHeight = chartRef.current.offsetHeight;
@@ -151,9 +137,8 @@ export default function Portfolio() {
       );
       setBubbleData(calculatedPositions);
     }
-  }, [portfolioLoading, ordersLoading, priceLoading, tokenQuantities]);
+  }, [portfolioLoading, ordersLoading, priceLoading, tokenQuantities, currentPrice]);
 
-  // 1) Convert to PieChart data (as before)
   const tokenBalances = Object.entries(tokenQuantities).reduce(
     (acc: Record<string, number>, [symbol, quantity]) => {
       acc[symbol] = quantity * currentPrice;
@@ -170,28 +155,24 @@ export default function Portfolio() {
       color: COLORS[index % COLORS.length],
     }));
 
-  // 2) Build data for the Cost-vs-Current-Value comparison chart
-  //    We'll only include tokens with a positive quantity
   const costValueData = Object.values(tokenCostData)
-    .filter((t) => t.quantity > 0) // Only show net holdings > 0
+    .filter((t) => t.quantity > 0)
     .map((t, index) => {
       const currentVal = t.quantity * currentPrice;
       return {
         symbol: t.symbol,
         cost: t.cost,
         currentValue: currentVal,
-        // difference: positive means gain, negative means loss
         difference: currentVal - t.cost,
       };
     });
 
-  // Adjust bubble size based on the number of bubbles
   const bubbleCount = bubbleData.length;
-  const baseSize = 5000; // Adjust this value to change the base size
-  const sizeFactor = baseSize / (bubbleCount || 1); // Ensure no division by zero
+  const baseSize = 5000;
+  const sizeFactor = baseSize / (bubbleCount || 1);
 
-  if (portfolioLoading || ordersLoading || priceLoading) {
-    return <div>Loading...</div>;
+  if (portfolioLoading || ordersLoading || priceLoading || bubbleData.length === 0) {
+    return <div>Loading... or no data available.</div>;
   }
 
   if (portfolioError || ordersError || priceError) {
@@ -214,7 +195,6 @@ export default function Portfolio() {
 
   return (
     <div>
-      {/* Spacer div to prevent overlap with the header */}
       <div style={{ height: '60px' }}></div>
     
     <div className="container mx-auto p-4 max-w-4xl">
@@ -269,7 +249,6 @@ export default function Portfolio() {
           </CardContent>
         </Card>
 
-        {/* Bubble Chart (Distribution) */}
         <Card>
           <CardHeader>
             <CardTitle>Portfolio Bubble Map</CardTitle>
@@ -279,7 +258,7 @@ export default function Portfolio() {
               <ResponsiveContainer width="100%" height="100%">
                 <ScatterChart
                   margin={{ top: 20, right: 20, bottom: 30, left: 30 }}
-                  onMouseOver={() => { }}
+                  onMouseMove={() => { }}
                   ref={chartRef}
                 >
                   <XAxis type="number" dataKey="x" name="X" unit="" tick={false} domain={[0, 1]} />
@@ -332,7 +311,6 @@ export default function Portfolio() {
           </CardContent>
         </Card>
 
-        {/* NEW: Bar Chart (Cost Basis vs Current Value) */}
         <Card>
           <CardHeader>
             <CardTitle>Cost vs Market Value</CardTitle>
