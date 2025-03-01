@@ -14,8 +14,23 @@ import {
   BarChart,
   Bar,
 } from "recharts";
+import { useEffect, useRef, useState } from "react";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8", "#82ca9d"];
+
+const GRAVITY = 0.1;
+const FRICTION = 0.9;
+
+interface BubbleData {
+  name: string;
+  value: number;
+  quantity: number;
+  color: string;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+}
 
 export default function Portfolio() {
   const queryClient = useQueryClient();
@@ -79,7 +94,6 @@ export default function Portfolio() {
   });
 
   // Get latest price to calculate current token values
-  // (In a real app, you'd likely have a price per token.)
   const { data: latestPrice, isLoading: priceLoading, error: priceError } = useQuery<{ price: string }>({
     queryKey: ["/api/prices/latest"],
     onError: (error) => {
@@ -87,6 +101,93 @@ export default function Portfolio() {
     },
   });
   const currentPrice = parseFloat(latestPrice?.price || "0");
+
+  // Prepare data for the bubble chart
+  const initialBubbleData: BubbleData[] = Object.entries(tokenQuantities)
+    .filter(([_, quantity]) => quantity > 0)
+    .map(([symbol, quantity], index) => ({
+      name: symbol,
+      value: quantity * currentPrice,
+      quantity: quantity,
+      color: COLORS[index % COLORS.length],
+      x: Math.random(),
+      y: Math.random(),
+      vx: (Math.random() - 0.5) * 2,
+      vy: (Math.random() - 0.5) * 2,
+    }));
+
+  const [bubbleData, setBubbleData] = useState<BubbleData[]>(initialBubbleData);
+  const chartRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (portfolioLoading || ordersLoading || priceLoading) return;
+
+    const updatePositions = () => {
+      setBubbleData((prevData) => {
+        const newData = prevData.map((bubble, i) => {
+          let newBubble = { ...bubble };
+
+          // Gravity towards the center
+          const centerX = 0.5;
+          const centerY = 0.5;
+          const dx = centerX - newBubble.x;
+          const dy = centerY - newBubble.y;
+          const angle = Math.atan2(dy, dx);
+
+          newBubble.vx += GRAVITY * Math.cos(angle);
+          newBubble.vy += GRAVITY * Math.sin(angle);
+
+          // Collision detection
+          for (let j = 0; j < prevData.length; j++) {
+            if (i === j) continue;
+            const other = prevData[j];
+            const dx = newBubble.x - other.x;
+            const dy = newBubble.y - other.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const combinedRadius = 0.05 + 0.05; // Approximate radius
+
+            if (distance < combinedRadius) {
+              // Resolve collision
+              const overlap = combinedRadius - distance;
+              const adjustX = (overlap / 2) * (dx / distance);
+              const adjustY = (overlap / 2) * (dy / distance);
+
+              newBubble.x += adjustX;
+              newBubble.y += adjustY;
+            }
+          }
+
+          // Apply velocity and friction
+          newBubble.x += newBubble.vx;
+          newBubble.y += newBubble.vy;
+          newBubble.vx *= FRICTION;
+          newBubble.vy *= FRICTION;
+
+          // Bounce off walls
+          if (newBubble.x < 0 || newBubble.x > 1) {
+            newBubble.vx = -newBubble.vx;
+          }
+          if (newBubble.y < 0 || newBubble.y > 1) {
+            newBubble.vy = -newBubble.vy;
+          }
+
+          return newBubble;
+        });
+        return newData;
+      });
+    };
+
+    const animationFrame = () => {
+      updatePositions();
+      requestAnimationFrame(animationFrame);
+    };
+
+    requestAnimationFrame(animationFrame);
+
+    return () => {
+      cancelAnimationFrame(animationFrame);
+    };
+  }, [portfolioLoading, ordersLoading, priceLoading]);
 
   // 1) Convert to PieChart data (as before)
   const tokenBalances = Object.entries(tokenQuantities).reduce(
@@ -120,21 +221,8 @@ export default function Portfolio() {
       };
     });
 
-  // Prepare data for the bubble chart
-  const portfolioDataBubble = Object.entries(tokenQuantities)
-    .filter(([_, quantity]) => quantity > 0) // Show only tokens with positive quantities
-    .map(([symbol, quantity], index) => ({
-      name: symbol,
-      value: quantity * currentPrice, // Bubble size based on token value
-      quantity: quantity, // Store quantity for tooltip
-      color: COLORS[index % COLORS.length],
-      x: (index + 1) / (Object.keys(tokenQuantities).length + 1),
-      y: 0.5,
-      // label: `${symbol} (${quantity.toFixed(2)})`, // Label with token name and quantity
-    }));
-
   // Adjust bubble size based on the number of bubbles
-  const bubbleCount = portfolioDataBubble.length;
+  const bubbleCount = bubbleData.length;
   const baseSize = 5000; // Adjust this value to change the base size
   const sizeFactor = baseSize / (bubbleCount || 1); // Ensure no division by zero
 
@@ -153,7 +241,7 @@ export default function Portfolio() {
       <ul>
         {payload.map((entry: any, index: number) => (
           <li key={`item-${index}`} style={{ color: entry.color }}>
-            {entry.value}
+            {entry.name}
           </li>
         ))}
       </ul>
@@ -225,11 +313,13 @@ export default function Portfolio() {
           <CardContent>
             <div className="h-[400px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <ScatterChart margin={{ top: 20, right: 20, bottom: 30, left: 30 }}
+                <ScatterChart
+                  margin={{ top: 20, right: 20, bottom: 30, left: 30 }}
                   onMouseOver={() => { }}
+                  ref={chartRef}
                 >
-                  <XAxis type="number" dataKey="x" name="X" unit="" tick={false} domain={[0, 1]}/>
-                  <YAxis type="number" dataKey="y" name="Y" unit="" tick={false} domain={[0, 1]}/>
+                  <XAxis type="number" dataKey="x" name="X" unit="" tick={false} domain={[0, 1]} />
+                  <YAxis type="number" dataKey="y" name="Y" unit="" tick={false} domain={[0, 1]} />
                   <ZAxis type="number" dataKey="value" name="Value" range={[100, sizeFactor]} />
                   <Tooltip
                     formatter={(value: any, name: any, props: any) => {
@@ -250,11 +340,11 @@ export default function Portfolio() {
                   <Legend content={CustomLegend} />
                   <Scatter
                     name="Tokens"
-                    data={portfolioDataBubble}
+                    data={bubbleData}
                     fill="#8884d8"
                     shape="circle"
                   >
-                    {portfolioDataBubble.map((entry, index) => (
+                    {bubbleData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Scatter>
