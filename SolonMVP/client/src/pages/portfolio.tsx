@@ -448,7 +448,7 @@ export default function Portfolio() {
                       </div>
                       <div className="flex flex-col items-end">
                         <span className="text-base">
-                          {(quantity as number).toFixed(2)} tokens
+                          {(quantity as number).toFixed(0)} tokens
                         </span>
                         <span className="text-sm text-muted-foreground">
                           ${(quantity * getTokenPrice(symbol)).toFixed(2)}
