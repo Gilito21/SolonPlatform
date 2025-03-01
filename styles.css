@@ -1,3 +1,35 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: rgb(0, 0, 0); /* Dark blue almost black background color */
+  color: white; /* Ensure text is readable on dark background */
+}
+
+header {
+  background-color: rgb(0, 0, 0); /* Match the background color of your web application */
+  padding: 10px;
+  text-align: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000; /* Ensure the header stays on top */
+}
+
+.header-info {
+  margin-top: 10px;
+}
+
+nav {
+  margin-top: 20px;
+}
+
+/* Add padding to the top of the main content to account for the fixed header */
+.main-content {
+  padding-top: 70px; /* Adjust this value based on the height of your header */
+}
+
 /* Desktop styles */
 .header {
     display: flex;
@@ -30,4 +62,155 @@
         text-align: left;
         padding: 10px 0;
     }
+}
+
+@media (max-width: 768px) {
+  header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    width: 100%; /* Ensure header takes full width */
+    box-sizing: border-box; /* Include padding in width calculation */
+  }
+
+  header h1 {
+    font-size: 1em;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  nav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
+  nav a {
+    padding: 10px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .content {
+    padding: 10px;
+  }
+
+  .content h2 {
+    font-size: 1.2em;
+  }
+
+  .content p {
+    font-size: 1em;
+  }
+
+  .footer {
+    padding: 10px;
+    text-align: center;
+  }
+
+  .header-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 10px;
+  }
+
+  .header-info span {
+    font-size: 1em;
+    margin: 5px 0;
+  }
+}
+
+/* Additional styles for smaller screens */
+@media (max-width: 480px) {
+  header h1 {
+    font-size: 1.2em;
+  }
+
+  header {
+    width: 100%; /* Ensure header takes full width */
+    box-sizing: border-box; /* Include padding in width calculation */
+  }
+
+  .content h2 {
+    font-size: 1em;
+  }
+
+  .content p {
+    font-size: 0.9em;
+  }
+
+  .header-info span {
+    font-size: 0.9em;
+  }
+}
+
+@media (min-width: 600px) {
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .header-info {
+    margin-top: 0;
+  }
+
+  nav {
+    margin-top: 0;
+  }
+}
+
+/* Ensure the header is aligned with the rest of the page on mobile devices */
+@media (max-width: 640px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* General container styling to ensure proper alignment and padding */
+.container {
+  max-width: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  box-sizing: border-box;
+  margin: 0 auto;
+}
+
+/* Card component styles */
+.card {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.card-header {
+  padding: 1rem;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.card-description {
+  font-size: 1rem;
+  color: #666;
+}
+
+.card-content {
+  padding: 1rem;
+}
+
+.card-footer {
+  padding: 1rem;
+  border-top: 1px solid #eaeaea;
+  display: flex;
+  justify-content: flex-end;
 }
