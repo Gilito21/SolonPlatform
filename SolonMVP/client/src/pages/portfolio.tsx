@@ -18,9 +18,6 @@ import { useEffect, useRef, useState } from "react";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8", "#82ca9d"];
 
-const GRAVITY = 0.1;
-const FRICTION = 0.9;
-
 interface BubbleData {
   name: string;
   value: number;
@@ -28,8 +25,6 @@ interface BubbleData {
   color: string;
   x: number;
   y: number;
-  vx: number;
-  vy: number;
 }
 
 export default function Portfolio() {
@@ -110,84 +105,14 @@ export default function Portfolio() {
       value: quantity * currentPrice,
       quantity: quantity,
       color: COLORS[index % COLORS.length],
-      x: Math.random(),
-      y: Math.random(),
-      vx: (Math.random() - 0.5) * 2,
-      vy: (Math.random() - 0.5) * 2,
+      x: (index + 1) / (Object.keys(tokenQuantities).length + 1),
+      y: 0.5,
     }));
 
   const [bubbleData, setBubbleData] = useState<BubbleData[]>(initialBubbleData);
   const chartRef = useRef<any>(null);
 
-  useEffect(() => {
-    if (portfolioLoading || ordersLoading || priceLoading) return;
-
-    const updatePositions = () => {
-      setBubbleData((prevData) => {
-        const newData = prevData.map((bubble, i) => {
-          let newBubble = { ...bubble };
-
-          // Gravity towards the center
-          const centerX = 0.5;
-          const centerY = 0.5;
-          const dx = centerX - newBubble.x;
-          const dy = centerY - newBubble.y;
-          const angle = Math.atan2(dy, dx);
-
-          newBubble.vx += GRAVITY * Math.cos(angle);
-          newBubble.vy += GRAVITY * Math.sin(angle);
-
-          // Collision detection
-          for (let j = 0; j < prevData.length; j++) {
-            if (i === j) continue;
-            const other = prevData[j];
-            const dx = newBubble.x - other.x;
-            const dy = newBubble.y - other.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            const combinedRadius = 0.05 + 0.05; // Approximate radius
-
-            if (distance < combinedRadius) {
-              // Resolve collision
-              const overlap = combinedRadius - distance;
-              const adjustX = (overlap / 2) * (dx / distance);
-              const adjustY = (overlap / 2) * (dy / distance);
-
-              newBubble.x += adjustX;
-              newBubble.y += adjustY;
-            }
-          }
-
-          // Apply velocity and friction
-          newBubble.x += newBubble.vx;
-          newBubble.y += newBubble.vy;
-          newBubble.vx *= FRICTION;
-          newBubble.vy *= FRICTION;
-
-          // Bounce off walls
-          if (newBubble.x < 0 || newBubble.x > 1) {
-            newBubble.vx = -newBubble.vx;
-          }
-          if (newBubble.y < 0 || newBubble.y > 1) {
-            newBubble.vy = -newBubble.vy;
-          }
-
-          return newBubble;
-        });
-        return newData;
-      });
-    };
-
-    const animationFrame = () => {
-      updatePositions();
-      requestAnimationFrame(animationFrame);
-    };
-
-    requestAnimationFrame(animationFrame);
-
-    return () => {
-      cancelAnimationFrame(animationFrame);
-    };
-  }, [portfolioLoading, ordersLoading, priceLoading]);
+  // Remove useEffect that updates positions
 
   // 1) Convert to PieChart data (as before)
   const tokenBalances = Object.entries(tokenQuantities).reduce(
@@ -308,7 +233,7 @@ export default function Portfolio() {
         {/* Bubble Chart (Distribution) */}
         <Card>
           <CardHeader>
-            <CardTitle>Portfolio Distribution</CardTitle>
+            <CardTitle>Portfolio Bubble Map</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[400px] w-full">
