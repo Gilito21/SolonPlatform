@@ -27,6 +27,31 @@ interface BubbleData {
   y: number;
 }
 
+const calculateBubblePositions = (
+  bubbleData: BubbleData[],
+  chartWidth: number,
+  chartHeight: number
+) => {
+  const numBubbles = bubbleData.length;
+  const radius = Math.min(chartWidth, chartHeight) / 4; // Radius of the "imaginary" circle
+  const centerX = chartWidth / 2;
+  const centerY = chartHeight / 2;
+
+  const positions = bubbleData.map((bubble, index) => {
+    const angle = (2 * Math.PI * index) / numBubbles;
+    const x = centerX + radius * Math.cos(angle);
+    const y = centerY + radius * Math.sin(angle);
+
+    return {
+      ...bubble,
+      x: x / chartWidth, // Normalize X
+      y: y / chartHeight, // Normalize Y
+    };
+  });
+
+  return positions;
+};
+
 export default function Portfolio() {
   const queryClient = useQueryClient();
 
@@ -105,14 +130,28 @@ export default function Portfolio() {
       value: quantity * currentPrice,
       quantity: quantity,
       color: COLORS[index % COLORS.length],
-      x: (index + 1) / (Object.keys(tokenQuantities).length + 1),
-      y: 0.5,
+      x: 0, // Dummy value, will be calculated later
+      y: 0, // Dummy value, will be calculated later
     }));
 
   const [bubbleData, setBubbleData] = useState<BubbleData[]>(initialBubbleData);
   const chartRef = useRef<any>(null);
 
-  // Remove useEffect that updates positions
+  useEffect(() => {
+    if (portfolioLoading || ordersLoading || priceLoading) return;
+
+    // Calculate bubble positions when data is loaded
+    if (chartRef.current) {
+      const chartWidth = chartRef.current.offsetWidth;
+      const chartHeight = chartRef.current.offsetHeight;
+      const calculatedPositions = calculateBubblePositions(
+        initialBubbleData,
+        chartWidth,
+        chartHeight
+      );
+      setBubbleData(calculatedPositions);
+    }
+  }, [portfolioLoading, ordersLoading, priceLoading]);
 
   // 1) Convert to PieChart data (as before)
   const tokenBalances = Object.entries(tokenQuantities).reduce(
@@ -271,6 +310,20 @@ export default function Portfolio() {
                   >
                     {bubbleData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                    {bubbleData.map((entry, index) => (
+                      <Label
+                        key={`label-${index}`}
+                        value={entry.name}
+                        position="inside"
+                        fill="#fff"
+                        style={{
+                          fontSize: 12,
+                          fontWeight: "bold",
+                          textAnchor: "middle",
+                          dominantBaseline: "middle",
+                        }}
+                      />
                     ))}
                   </Scatter>
                 </ScatterChart>
