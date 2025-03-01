@@ -109,6 +109,10 @@ export default function Portfolio() {
     });
 
   return (
+    <div>
+      {/* Spacer div to prevent overlap with the header */}
+      <div style={{ height: '60px' }}></div>
+    
     <div className="container mx-auto p-4 max-w-4xl">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">My Portfolio</h1>
@@ -319,6 +323,7 @@ export default function Portfolio() {
             </div>
           </CardContent>
         </Card>
+      </div>
       </div>
     </div>
   );

@@ -73,7 +73,7 @@ export default function Home() {
   return (
     <div>
       {/* Spacer div to prevent overlap with the header */}
-      <div style={{ height: '80px' }}></div>
+      <div style={{ height: '60px' }}></div>
 
       <div className="container mx-auto p-4 max-w-4xl">
         <div className="mb-6">

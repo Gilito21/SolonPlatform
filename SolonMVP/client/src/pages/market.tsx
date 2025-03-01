@@ -202,152 +202,156 @@ export default function Market() {
   };
 
   return (
-    <div className="container mx-auto p-4 max-w-4xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">{token.name}</h1>
-        <p className="text-muted-foreground">
-          {token.description}
-        </p>
-      </div>
+    <div>
+      {/* Spacer div to prevent overlap with the header */}
+      <div style={{ height: '60px' }}></div>
+      <div className="container mx-auto p-4 max-w-4xl">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">{token.name}</h1>
+          <p className="text-muted-foreground">
+            {token.description}
+          </p>
+        </div>
 
-      <div className="grid gap-6">
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6">
+          <div className="grid gap-6 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Market Data</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Current Price:</span>
+                    <span className="text-xl font-medium">${currentPrice.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Your Cash Balance:</span>
+                    <span className="text-xl font-medium">${portfolio?.balance?.toFixed(2) || "0.00"}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Your {tokenSymbol} Tokens:</span>
+                    <span className="text-xl font-medium">{tokenQuantity.toFixed(2)} {tokenSymbol}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex justify-between items-center">
+                  <span>{token.description} This token represents a unique opportunity in the market, offering innovative solutions and robust technology.</span>
+                  {/* Price display removed */}
+                </CardTitle>
+              </CardHeader>
+            </Card>
+          </div>
+
           <Card>
             <CardHeader>
-              <CardTitle>Market Data</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Current Price:</span>
-                  <span className="text-xl font-medium">${currentPrice.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Your Cash Balance:</span>
-                  <span className="text-xl font-medium">${portfolio?.balance?.toFixed(2) || "0.00"}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Your {tokenSymbol} Tokens:</span>
-                  <span className="text-xl font-medium">{tokenQuantity.toFixed(2)} {tokenSymbol}</span>
-                </div>
+              <CardTitle>Price History</CardTitle>
+              <div className="flex gap-2 mt-2">
+                {["1H", "24H", "7D"].map((tf) => (
+                  <Button
+                    key={tf}
+                    variant={timeframe === tf ? "default" : "outline"}
+                    onClick={() => setTimeframe(tf)}
+                    size="sm"
+                  >
+                    {tf}
+                  </Button>
+                ))}
               </div>
+            </CardHeader>
+            <CardContent className="pt-6 h-[300px]">
+              {priceData && (
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={priceData}>
+                    <XAxis
+                      dataKey="timestamp"
+                      tickFormatter={formatTimestamp}
+                      stroke="hsl(var(--muted-foreground))"
+                    />
+                    <YAxis
+                      domain={[minPrice, maxPrice]}
+                      tickFormatter={(value) => `$${value.toFixed(2)}`}
+                      stroke="hsl(var(--muted-foreground))"
+                    />
+                    <Tooltip
+                      labelFormatter={(label) => formatTimestamp(label as string)}
+                      formatter={(value: any) => [
+                        `$${value.toFixed(2)}`,
+                        "Price",
+                      ]}
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--background))",
+                        border: "1px solid hsl(var(--border))",
+                      }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="price"
+                      stroke="hsl(var(--primary))"
+                      strokeWidth={2}
+                      dot={false}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle className="flex justify-between items-center">
-                <span>{token.description} This token represents a unique opportunity in the market, offering innovative solutions and robust technology.</span>
-                  {/* Price display removed */}
-              </CardTitle>
+              <CardTitle>Trade</CardTitle>
+              <CardDescription>
+                Enter the amount of tokens you want to buy or sell at the current market price.
+              </CardDescription>
             </CardHeader>
+            <CardContent>
+              <Form {...form}>
+                <form className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="amount"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Amount</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="1"
+                            min="1"
+                            placeholder="Enter amount to trade"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="flex gap-4">
+                    <Button
+                      className="flex-1"
+                      onClick={onSubmit("buy")}
+                      disabled={orderMutation.isPending || loadingPrice}
+                    >
+                      Buy
+                    </Button>
+                    <Button
+                      className="flex-1"
+                      variant="secondary"
+                      onClick={onSubmit("sell")}
+                      disabled={orderMutation.isPending || loadingPrice || (portfolio?.balance || 0) <= 0}
+                    >
+                      Sell
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </CardContent>
           </Card>
         </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Price History</CardTitle>
-            <div className="flex gap-2 mt-2">
-              {["1H", "24H", "7D"].map((tf) => (
-                <Button
-                  key={tf}
-                  variant={timeframe === tf ? "default" : "outline"}
-                  onClick={() => setTimeframe(tf)}
-                  size="sm"
-                >
-                  {tf}
-                </Button>
-              ))}
-            </div>
-          </CardHeader>
-          <CardContent className="pt-6 h-[300px]">
-            {priceData && (
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={priceData}>
-                  <XAxis
-                    dataKey="timestamp"
-                    tickFormatter={formatTimestamp}
-                    stroke="hsl(var(--muted-foreground))"
-                  />
-                  <YAxis 
-                    domain={[minPrice, maxPrice]}
-                    tickFormatter={(value) => `$${value.toFixed(2)}`}
-                    stroke="hsl(var(--muted-foreground))"
-                  />
-                  <Tooltip
-                    labelFormatter={(label) => formatTimestamp(label as string)}
-                    formatter={(value: any) => [
-                      `$${value.toFixed(2)}`,
-                      "Price",
-                    ]}
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--background))",
-                      border: "1px solid hsl(var(--border))",
-                    }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="price"
-                    stroke="hsl(var(--primary))"
-                    strokeWidth={2}
-                    dot={false}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Trade</CardTitle>
-            <CardDescription>
-              Enter the amount of tokens you want to buy or sell at the current market price.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="amount"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Amount</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number" 
-                          step="1" 
-                          min="1"
-                          placeholder="Enter amount to trade"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="flex gap-4">
-                  <Button
-                    className="flex-1"
-                    onClick={onSubmit("buy")}
-                    disabled={orderMutation.isPending || loadingPrice}
-                  >
-                    Buy
-                  </Button>
-                  <Button
-                    className="flex-1"
-                    variant="secondary"
-                    onClick={onSubmit("sell")}
-                    disabled={orderMutation.isPending || loadingPrice || (portfolio?.balance || 0) <= 0}
-                  >
-                    Sell
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
