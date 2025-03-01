@@ -129,8 +129,8 @@ export default function Portfolio() {
       value: quantity * currentPrice, // Bubble size based on token value
       quantity: quantity, // Store quantity for tooltip
       color: COLORS[index % COLORS.length],
-      x: Math.random(), // Random X position for distribution
-      y: Math.random(), // Random Y position for distribution
+      x: (index + 1) / (Object.keys(tokenQuantities).length + 1),
+      y: 0.5,
       label: `${symbol} (${quantity.toFixed(2)})`, // Label with token name and quantity
     }));
 
@@ -213,8 +213,8 @@ export default function Portfolio() {
             <div className="h-[400px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <ScatterChart margin={{ top: 20, right: 20, bottom: 30, left: 30 }}>
-                  <XAxis type="number" dataKey="x" name="X" unit="" tick={false} />
-                  <YAxis type="number" dataKey="y" name="Y" unit="" tick={false} />
+                  <XAxis type="number" dataKey="x" name="X" unit="" tick={false} domain={[0, 1]}/>
+                  <YAxis type="number" dataKey="y" name="Y" unit="" tick={false} domain={[0, 1]}/>
                   <ZAxis type="number" dataKey="value" name="Value" range={[100, sizeFactor]} />
                   <Tooltip
                     formatter={(value: any, name: any, props: any) => {
