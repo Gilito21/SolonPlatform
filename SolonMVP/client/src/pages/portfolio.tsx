@@ -12,16 +12,17 @@ import {
   ZAxis, // Import ZAxis
   BarChart,
   Bar,
+  Cell,
 } from "recharts";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8", "#82ca9d"];
 
 export default function Portfolio() {
-  const { data: portfolio } = useQuery<{ balance: number }>({
+  const { data: portfolio, isLoading: portfolioLoading } = useQuery<{ balance: number }>({
     queryKey: ["/api/portfolio"],
   });
 
-  const { data: orders } = useQuery<any[]>({
+  const { data: orders, isLoading: ordersLoading } = useQuery<any[]>({
     queryKey: ["/api/orders"],
   });
 
@@ -71,7 +72,7 @@ export default function Portfolio() {
 
   // Get latest price to calculate current token values
   // (In a real app, you'd likely have a price per token.)
-  const { data: latestPrice } = useQuery<{ price: string }>({
+  const { data: latestPrice, isLoading: priceLoading } = useQuery<{ price: string }>({
     queryKey: ["/api/prices/latest"],
   });
   const currentPrice = parseFloat(latestPrice?.price || "0");
@@ -119,6 +120,10 @@ export default function Portfolio() {
       x: Math.random(), // Random X position for distribution
       y: Math.random(), // Random Y position for distribution
     }));
+
+  if (portfolioLoading || ordersLoading || priceLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div>
