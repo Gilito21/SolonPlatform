@@ -2,26 +2,26 @@ import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
 import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Legend,
-  Tooltip,
-  BarChart,
-  Bar,
+  ScatterChart,
+  Scatter,
   XAxis,
   YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  Legend,
 } from "recharts";
+
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8", "#82ca9d"];
 
 export default function Portfolio() {
-  const { data: portfolio } = useQuery({
+  const { data: portfolio }: { data: { balance: number } } = useQuery({
     queryKey: ["/api/portfolio"],
   });
 
-  const { data: orders } = useQuery({
+  const { data: orders }: { data: Array<{ amount: string; symbol: string; type: string; price: string; timestamp: string }> } = useQuery({
     queryKey: ["/api/orders"],
   });
 
@@ -163,31 +163,23 @@ export default function Portfolio() {
           <CardContent>
             <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={portfolioData}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={80}
-                    label={({ name, percent }) =>
-                      `${name} ${(percent * 100).toFixed(0)}%`
-                    }
-                  >
-                    {portfolioData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={(value: number) => [`$${value.toFixed(2)}`, "Value"]}
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--background))",
-                      border: "1px solid hsl(var(--border))",
-                    }}
-                  />
-                  <Legend />
-                </PieChart>
+                <ScatterChart>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <Scatter
+                      data={portfolioData}
+                      fill="#8884d8"
+                      shape="circle"
+                      name="Token Amount"
+                    />
+                    <Tooltip
+                      formatter={(value: number) => [`$${value.toFixed(2)}`, "Value"]}
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--background))",
+                        border: "1px solid hsl(var(--border))",
+                      }}
+                    />
+                  </ResponsiveContainer>
+                </ScatterChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
@@ -202,7 +194,8 @@ export default function Portfolio() {
             {costValueData.length > 0 ? (
               <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={costValueData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                    <BarChart data={costValueData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }} />
+
                     <XAxis dataKey="symbol" />
                     <YAxis />
                     <Tooltip
