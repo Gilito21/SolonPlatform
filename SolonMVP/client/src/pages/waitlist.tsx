@@ -61,7 +61,7 @@ export default function Waitlist() {
           Welcome to <img src={logo} alt="Solon Logo" className="inline h-10" />
         </h1>
         <p className="text-xl mb-6">
-          The first platform that transforms shares from startups backed by prestigious Venture Capitals into tradable tokens.
+          The first platform that transforms shares from startups backed by prestigious Venture Capitals into tradable tokens. (For better mobile experience rotate your device for landscape view)
         </p>
         <div className="bg-muted p-6 rounded-lg text-left mb-8">
           <h2 className="text-2xl font-semibold mb-3">How It Works</h2>
