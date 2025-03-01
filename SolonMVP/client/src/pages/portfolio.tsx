@@ -163,10 +163,30 @@ export default function Portfolio() {
     const { payload } = props;
 
     return (
-      <ul>
+      <ul style={{ display: 'flex', flexWrap: 'wrap' }}>
         {payload.map((entry: any, index: number) => (
-          <li key={`item-${index}`} style={{ color: entry.color }}>
-            {entry.name}
+          <li
+            key={`item-${index}`}
+            style={{
+              color: 'white',
+              fontSize: '14px',
+              padding: '5px',
+              display: 'flex',
+              alignItems: 'center',
+              marginRight: '10px',
+            }}
+          >
+            <span
+              style={{
+                display: 'inline-block',
+                width: '12px',
+                height: '12px',
+                borderRadius: '50%',
+                backgroundColor: entry.color,
+                marginRight: '5px',
+              }}
+            />
+            {entry.name} ({bubbleData.find((item) => item.name === entry.name)?.quantity.toFixed(2)})
           </li>
         ))}
       </ul>
@@ -260,6 +280,7 @@ export default function Portfolio() {
                     contentStyle={{
                       backgroundColor: "hsl(var(--background))",
                       border: "1px solid hsl(var(--border))",
+                      color: "white", // Set text color to white
                     }}
                   />
                   <Legend content={CustomLegend} />
