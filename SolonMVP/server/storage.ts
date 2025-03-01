@@ -197,8 +197,8 @@ export class MemStorage implements IStorage {
 
     // Send email to admin
     const info = await transporter.sendMail({
-      from: '"Waitlist Notifier" <waitlist@Solon.com>',
-      to: PERSONAL_EMAIL,
+      from: '"Waitlist Notifier" <waitlistsolon@gmail.com>',
+      to: YOUR_EMAIL,
       subject: "New Waitlist Signup 🚀",
       text: `Someone new has joined the waitlist: ${subscriberEmail}`,
       html: `
