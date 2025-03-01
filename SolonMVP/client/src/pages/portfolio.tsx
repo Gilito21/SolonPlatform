@@ -25,7 +25,6 @@ interface BubbleData {
   color: string;
   x: number;
   y: number;
-  radius?: number;
 }
 
 export default function Portfolio() {
@@ -57,7 +56,7 @@ export default function Portfolio() {
       return acc;
     }, {}) || {};
 
-  // Calculate net cost (for cost basis)
+  // (New) Calculate net cost (for cost basis)
   const tokenCostData: Record<
     string,
     { symbol: string; cost: number; quantity: number }
@@ -81,6 +80,7 @@ export default function Portfolio() {
       tokenCostData[symbol].cost += costChange;
       tokenCostData[symbol].quantity += amount;
     } else {
+      // For sells, subtract cost and reduce quantity
       tokenCostData[symbol].cost -= costChange;
       tokenCostData[symbol].quantity -= amount;
     }
@@ -95,124 +95,72 @@ export default function Portfolio() {
   });
   const currentPrice = parseFloat(latestPrice?.price || "0");
 
-  // This function will generate a packed bubble layout
-  const generatePackedLayout = (data: BubbleData[]): BubbleData[] => {
-    if (!data.length) return [];
+  // Prepare data for the bubble chart with improved positioning logic
+  const generateClusteredBubbleData = () => {
+    const tokens = Object.entries(tokenQuantities)
+      .filter(([_, quantity]) => quantity > 0)
+      .map(([symbol, quantity], index) => ({
+        name: symbol,
+        value: quantity * currentPrice,
+        quantity: quantity,
+        color: COLORS[index % COLORS.length],
+      }));
+
+    // Sort tokens by value for better positioning (larger bubbles in center)
+    tokens.sort((a, b) => b.value - a.value);
     
-    // Sort by value (largest first) to make sure larger bubbles are placed first
-    const sortedData = [...data].sort((a, b) => b.value - a.value);
+    // Calculate positions using a circle packing algorithm simulation
+    // For simplicity, we'll use a basic approach where bubbles are placed
+    // in a circular pattern around the center
+    const bubbleData: BubbleData[] = [];
+    const centerX = 0.5;
+    const centerY = 0.5;
     
-    // Create a container with dimensions 1x1
-    const container = { width: 1, height: 1 };
-    
-    // Set initial positions to center
-    const packedData = sortedData.map(item => ({
-      ...item,
-      // Calculate radius based on value
-      radius: Math.sqrt(item.value) / Math.sqrt(sortedData[0].value) * 0.2,
-      x: 0.5,
-      y: 0.5
-    }));
-    
-    // Simple collision detection and resolution
-    const resolveCollisions = () => {
-      for (let i = 0; i < packedData.length; i++) {
-        for (let j = 0; j < packedData.length; j++) {
-          if (i !== j) {
-            const a = packedData[i];
-            const b = packedData[j];
-            
-            // Distance between centers
-            const dx = a.x - b.x;
-            const dy = a.y - b.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            
-            // Minimum distance to avoid collision
-            const minDistance = (a.radius || 0) + (b.radius || 0) + 0.01; // Added small gap
-            
-            if (distance < minDistance) {
-              // Calculate the movement direction
-              const nx = dx / distance;
-              const ny = dy / distance;
-              
-              // Move bubbles apart
-              const moveDistance = (minDistance - distance) / 2;
-              
-              packedData[i].x += nx * moveDistance;
-              packedData[i].y += ny * moveDistance;
-              packedData[j].x -= nx * moveDistance;
-              packedData[j].y -= ny * moveDistance;
-              
-              // Keep bubbles within container bounds
-              packedData[i].x = Math.max(packedData[i].radius || 0, Math.min(container.width - (packedData[i].radius || 0), packedData[i].x));
-              packedData[i].y = Math.max(packedData[i].radius || 0, Math.min(container.height - (packedData[i].radius || 0), packedData[i].y));
-              packedData[j].x = Math.max(packedData[j].radius || 0, Math.min(container.width - (packedData[j].radius || 0), packedData[j].x));
-              packedData[j].y = Math.max(packedData[j].radius || 0, Math.min(container.height - (packedData[j].radius || 0), packedData[j].y));
-            }
-          }
-        }
-      }
-    };
-    
-    // Push bubbles apart and center them
-    for (let iteration = 0; iteration < 100; iteration++) {
-      resolveCollisions();
+    // Place the largest bubble in the center
+    if (tokens.length > 0) {
+      bubbleData.push({
+        ...tokens[0],
+        x: centerX,
+        y: centerY,
+      });
     }
     
-    // Center the whole group if needed
-    const centerX = packedData.reduce((sum, item) => sum + item.x, 0) / packedData.length;
-    const centerY = packedData.reduce((sum, item) => sum + item.y, 0) / packedData.length;
-    const offsetX = 0.5 - centerX;
-    const offsetY = 0.5 - centerY;
+    // Place remaining bubbles in a spiral pattern
+    const angleStep = (2 * Math.PI) / (tokens.length > 1 ? tokens.length - 1 : 1);
+    let radius = 0.15; // Starting radius
     
-    packedData.forEach(item => {
-      item.x += offsetX;
-      item.y += offsetY;
-    });
+    for (let i = 1; i < tokens.length; i++) {
+      const angle = angleStep * (i - 1);
+      // Apply golden ratio for more natural distribution
+      const x = centerX + radius * Math.cos(angle) * (1 + (i % 3) * 0.1);
+      const y = centerY + radius * Math.sin(angle) * (1 + (i % 2) * 0.1);
+      
+      bubbleData.push({
+        ...tokens[i],
+        x,
+        y,
+      });
+      
+      // Slightly increase radius for next items to create layers
+      if (i % 5 === 0) {
+        radius += 0.05;
+      }
+    }
     
-    return packedData;
+    return bubbleData;
   };
 
-  // Prepare data for the bubble chart
-  const initialBubbleData: BubbleData[] = Object.entries(tokenQuantities)
-    .filter(([_, quantity]) => quantity > 0)
-    .map(([symbol, quantity], index) => ({
-      name: symbol,
-      value: quantity * currentPrice,
-      quantity: quantity,
-      color: COLORS[index % COLORS.length],
-      x: 0.5, // Initially center all bubbles
-      y: 0.5,
-    }));
-
-  // Use state to manage the bubble data
+  // Initialize bubble data
   const [bubbleData, setBubbleData] = useState<BubbleData[]>([]);
   const chartRef = useRef<any>(null);
   
-  // Update bubble layout when data changes
+  // Update bubble data when token quantities or prices change
   useEffect(() => {
-    if (initialBubbleData.length > 0) {
-      const packedLayout = generatePackedLayout(initialBubbleData);
-      setBubbleData(packedLayout);
+    if (Object.keys(tokenQuantities).length > 0 && currentPrice > 0) {
+      const newBubbleData = generateClusteredBubbleData();
+      setBubbleData(newBubbleData);
     }
-  }, [JSON.stringify(initialBubbleData)]);
-
-  // Calculate token balances for other charts
-  const tokenBalances = Object.entries(tokenQuantities).reduce(
-    (acc: Record<string, number>, [symbol, quantity]) => {
-      acc[symbol] = quantity * currentPrice;
-      return acc;
-    },
-    {}
-  );
-
-  const portfolioData = Object.entries(tokenBalances)
-    .filter(([_, value]) => value > 0)
-    .map(([symbol, value], index) => ({
-      name: symbol,
-      value,
-      color: COLORS[index % COLORS.length],
-    }));
+  }, [tokenQuantities, currentPrice]);
 
   // Build data for the Cost-vs-Current-Value comparison chart
   const costValueData = Object.values(tokenCostData)
@@ -227,10 +175,20 @@ export default function Portfolio() {
       };
     });
 
-  // Adjust bubble size based on the number of bubbles
-  const bubbleCount = bubbleData.length;
-  const baseSize = 5000;
-  const sizeFactor = baseSize / (bubbleCount || 1);
+  // Adjust bubble size based on the portfolio value
+  const totalPortfolioValue = Object.entries(tokenQuantities).reduce(
+    (sum, [_, quantity]) => sum + quantity * currentPrice,
+    0
+  );
+  
+  const getAdjustedSizeRange = () => {
+    const baseSize = 500;
+    const bubbleCount = bubbleData.length;
+    const minSize = Math.max(100, baseSize / (bubbleCount || 1));
+    const maxSize = Math.max(1000, baseSize * 2 / (bubbleCount || 1));
+    
+    return [minSize, maxSize];
+  };
 
   if (portfolioLoading || ordersLoading || priceLoading) {
     return <div>Loading...</div>;
@@ -240,28 +198,44 @@ export default function Portfolio() {
     return <div>Error loading data.</div>;
   }
 
-  // Enhanced legend component
+  // Improved legend to show token names and quantities
   const CustomLegend = (props: any) => {
     const { payload } = props;
 
     return (
-      <div className="flex flex-wrap gap-2 mt-2">
+      <ul style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', padding: '8px 0' }}>
         {bubbleData.map((item, index) => (
-          <div
-            key={`legend-${index}`}
-            className="flex items-center px-2 py-1 bg-background rounded-md border"
+          <li
+            key={`item-${index}`}
+            style={{
+              color: 'white',
+              fontSize: '14px',
+              padding: '5px 10px',
+              display: 'flex',
+              alignItems: 'center',
+              marginRight: '10px',
+              marginBottom: '6px',
+              background: 'rgba(0,0,0,0.1)',
+              borderRadius: '16px',
+            }}
           >
             <span
-              className="inline-block w-3 h-3 rounded-full mr-2"
-              style={{ backgroundColor: item.color }}
+              style={{
+                display: 'inline-block',
+                width: '12px',
+                height: '12px',
+                borderRadius: '50%',
+                backgroundColor: item.color,
+                marginRight: '5px',
+              }}
             />
-            <span className="text-sm font-medium">{item.name}</span>
-            <span className="text-xs text-muted-foreground ml-2">
+            <span style={{ fontWeight: '500' }}>{item.name}</span>
+            <span style={{ marginLeft: '4px', opacity: '0.8' }}>
               ({item.quantity.toFixed(2)})
             </span>
-          </div>
+          </li>
         ))}
-      </div>
+      </ul>
     );
   };
 
@@ -276,6 +250,9 @@ export default function Portfolio() {
           <p className="text-lg font-bold">{data.name}</p>
           <p className="text-sm">Quantity: {data.quantity.toFixed(2)}</p>
           <p className="text-sm">Value: ${data.value.toFixed(2)}</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            {(data.value / totalPortfolioValue * 100).toFixed(1)}% of portfolio
+          </p>
         </div>
       );
     }
@@ -284,216 +261,223 @@ export default function Portfolio() {
 
   return (
     <div>
+      {/* Spacer div to prevent overlap with the header */}
       <div style={{ height: '60px' }}></div>
     
-      <div className="container mx-auto p-4 max-w-4xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">My Portfolio</h1>
-          <p className="text-muted-foreground">
-            View your token holdings and transaction history
-          </p>
-        </div>
+    <div className="container mx-auto p-4 max-w-4xl">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">My Portfolio</h1>
+        <p className="text-muted-foreground">
+          View your token holdings and transaction history
+        </p>
+      </div>
 
-        <div className="grid gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Holdings</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Cash Balance:</span>
-                  <span className="text-xl font-medium">
-                    ${portfolio?.balance?.toFixed(2) || "0.00"}
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Token Value:</span>
-                  <span className="text-xl font-medium">
-                    ${(
-                      Object.entries(tokenQuantities).reduce(
-                        (sum, [_, quantity]) => sum + quantity * currentPrice,
-                        0
-                      ) ?? 0
-                    ).toFixed(2)}
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center border-t border-gray-200 pt-2 mt-2">
-                  <span className="text-muted-foreground font-medium">
-                    Total Portfolio Value:
-                  </span>
-                  <span className="text-xl font-bold text-primary">
-                    ${(
-                      (portfolio?.balance || 0) +
-                      Object.entries(tokenQuantities).reduce(
-                        (sum, [_, quantity]) => sum + quantity * currentPrice,
-                        0
-                      )
-                    ).toFixed(2)}
-                  </span>
-                </div>
+      <div className="grid gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Holdings</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Cash Balance:</span>
+                <span className="text-xl font-medium">
+                  ${portfolio?.balance?.toFixed(2) || "0.00"}
+                </span>
               </div>
-            </CardContent>
-          </Card>
 
-          {/* Bubble Chart (Distribution) */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Portfolio Bubble Map</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[400px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <ScatterChart
-                    margin={{ top: 20, right: 20, bottom: 50, left: 20 }}
-                    ref={chartRef}
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Token Value:</span>
+                <span className="text-xl font-medium">
+                  {totalPortfolioValue.toFixed(2)}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center border-t border-gray-200 pt-2 mt-2">
+                <span className="text-muted-foreground font-medium">
+                  Total Portfolio Value:
+                </span>
+                <span className="text-xl font-bold text-primary">
+                  {((portfolio?.balance || 0) + totalPortfolioValue).toFixed(2)}
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Bubble Chart (Distribution) */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Portfolio Bubble Map</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[400px] w-full bg-black rounded-md p-4">
+              <ResponsiveContainer width="100%" height="100%">
+                <ScatterChart
+                  margin={{ top: 20, right: 20, bottom: 10, left: 20 }}
+                  ref={chartRef}
+                >
+                  <XAxis 
+                    type="number" 
+                    dataKey="x" 
+                    name="X" 
+                    domain={[0, 1]} 
+                    tick={false} 
+                    axisLine={false}
+                  />
+                  <YAxis 
+                    type="number" 
+                    dataKey="y" 
+                    name="Y" 
+                    domain={[0, 1]} 
+                    tick={false} 
+                    axisLine={false}
+                  />
+                  <ZAxis 
+                    type="number" 
+                    dataKey="value" 
+                    range={getAdjustedSizeRange()} 
+                  />
+                  {/* Using the custom tooltip component */}
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend content={<CustomLegend />} />
+                  <Scatter
+                    name="Tokens"
+                    data={bubbleData}
+                    fill="#8884d8"
+                    shape="circle"
                   >
-                    <XAxis type="number" dataKey="x" name="X" unit="" tick={false} domain={[0, 1]} />
-                    <YAxis type="number" dataKey="y" name="Y" unit="" tick={false} domain={[0, 1]} />
-                    <ZAxis type="number" dataKey="value" name="Value" range={[100, sizeFactor]} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Scatter
-                      name="Tokens"
-                      data={bubbleData}
-                      fill="#8884d8"
-                      shape="circle"
-                    >
-                      {bubbleData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Scatter>
-                  </ScatterChart>
+                    {bubbleData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Scatter>
+                </ScatterChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Bar Chart (Cost Basis vs Current Value) */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Cost vs Market Value</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {costValueData.length > 0 ? (
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={costValueData}>
+                    <XAxis dataKey="symbol" />
+                    <YAxis />
+                    <Tooltip
+                      formatter={(value, name) =>
+                        name === "difference"
+                          ? [`$${(value as number).toFixed(2)}`, "Profit/Loss"]
+                          : [`$${(value as number).toFixed(2)}`, name]
+                      }
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--background))",
+                        border: "1px solid hsl(var(--border))",
+                      }}
+                    />
+                    <Legend />
+                    <Bar dataKey="cost" fill="#8884d8" name="Total Cost" />
+                    <Bar
+                      dataKey="currentValue"
+                      fill="#82ca9d"
+                      name="Current Value"
+                    />
+                  </BarChart>
                 </ResponsiveContainer>
               </div>
-              
-              {/* Render custom legend below the chart */}
-              <CustomLegend payload={bubbleData} />
-            </CardContent>
-          </Card>
+            ) : (
+              <p className="text-muted-foreground">No token data to display.</p>
+            )}
+          </CardContent>
+        </Card>
 
-          {/* Bar Chart (Cost Basis vs Current Value) */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Cost vs Market Value</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {costValueData.length > 0 ? (
-                <div className="h-[300px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={costValueData}>
-                      <XAxis dataKey="symbol" />
-                      <YAxis />
-                      <Tooltip
-                        formatter={(value, name) =>
-                          name === "difference"
-                            ? [`$${(value as number).toFixed(2)}`, "Profit/Loss"]
-                            : [`$${(value as number).toFixed(2)}`, name]
-                        }
-                        contentStyle={{
-                          backgroundColor: "hsl(var(--background))",
-                          border: "1px solid hsl(var(--border))",
-                        }}
-                      />
-                      <Legend />
-                      <Bar dataKey="cost" fill="#8884d8" name="Total Cost" />
-                      <Bar
-                        dataKey="currentValue"
-                        fill="#82ca9d"
-                        name="Current Value"
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              ) : (
-                <p className="text-muted-foreground">No token data to display.</p>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Token Holdings</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {Object.entries(tokenQuantities).length > 0 ? (
-                <div className="space-y-2">
-                  {Object.entries(tokenQuantities)
-                    .filter(([_, quantity]) => quantity > 0)
-                    .map(([symbol, quantity]) => (
-                      <div
-                        key={symbol}
-                        className="flex justify-between items-center p-2 border-b"
-                      >
-                        <div>
-                          <span className="font-medium">{symbol}</span>
-                        </div>
-                        <div className="flex flex-col items-end">
-                          <span className="text-base">
-                            {(quantity as number).toFixed(2)} tokens
-                          </span>
-                          <span className="text-sm text-muted-foreground">
-                            ${(quantity * currentPrice).toFixed(2)}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              ) : (
-                <p className="text-muted-foreground">No tokens in your portfolio yet.</p>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Transaction History</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {orders
-                  ?.slice()
-                  .sort(
-                    (a: any, b: any) =>
-                      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-                  )
-                  .map((order: any) => (
+        <Card>
+          <CardHeader>
+            <CardTitle>Token Holdings</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {Object.entries(tokenQuantities).length > 0 ? (
+              <div className="space-y-2">
+                {Object.entries(tokenQuantities)
+                  .filter(([_, quantity]) => quantity > 0)
+                  .map(([symbol, quantity]) => (
                     <div
-                      key={order.id}
-                      className="flex items-center justify-between py-2 border-b last:border-0"
+                      key={symbol}
+                      className="flex justify-between items-center p-2 border-b"
                     >
                       <div>
-                        <span
-                          className={`font-medium ${
-                            order.type === "buy" ? "text-green-500" : "text-red-500"
-                          }`}
-                        >
-                          {order.type.toUpperCase()} {order.symbol}
-                        </span>
-                        <p className="text-sm text-muted-foreground">
-                          {format(new Date(order.timestamp), "MMM d, yyyy HH:mm")}
-                        </p>
+                        <span className="font-medium">{symbol}</span>
                       </div>
-                      <div className="text-right">
-                        <p className="font-medium">
-                          {order.amount} {order.symbol}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          @ ${parseFloat(order.price).toFixed(2)}
-                        </p>
+                      <div className="flex flex-col items-end">
+                        <span className="text-base">
+                          {(quantity as number).toFixed(2)} tokens
+                        </span>
+                        <span className="text-sm text-muted-foreground">
+                          ${(quantity * currentPrice).toFixed(2)}
+                        </span>
                       </div>
                     </div>
                   ))}
-                {(!orders || (orders as any[]).length === 0) && (
-                  <p className="text-center text-muted-foreground py-4">
-                    No transactions yet
-                  </p>
-                )}
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            ) : (
+              <p className="text-muted-foreground">No tokens in your portfolio yet.</p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Transaction History</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {orders
+                ?.slice()
+                .sort(
+                  (a: any, b: any) =>
+                    new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+                )
+                .map((order: any) => (
+                  <div
+                    key={order.id}
+                    className="flex items-center justify-between py-2 border-b last:border-0"
+                  >
+                    <div>
+                      <span
+                        className={`font-medium ${
+                          order.type === "buy" ? "text-green-500" : "text-red-500"
+                        }`}
+                      >
+                        {order.type.toUpperCase()} {order.symbol}
+                      </span>
+                      <p className="text-sm text-muted-foreground">
+                        {format(new Date(order.timestamp), "MMM d, yyyy HH:mm")}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium">
+                        {order.amount} {order.symbol}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        @ ${parseFloat(order.price).toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              {(!orders || (orders as any[]).length === 0) && (
+                <p className="text-center text-muted-foreground py-4">
+                  No transactions yet
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
       </div>
     </div>
   );
