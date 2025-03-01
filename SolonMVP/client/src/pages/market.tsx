@@ -17,32 +17,32 @@ const tokens = {
   NXP: {
     name: "Nexus Protocol | Andreessen Horowitz",
     symbol: "NXP",
-    description: "A decentralized protocol for cross-chain communication and interoperability."
+    description: "A decentralized protocol for cross-chain communication and interoperability, enabling seamless transactions across different blockchain networks."
   },
   QTE: {
     name: "Quantum Edge | Sequoia Capital",
     symbol: "QTE",
-    description: "Next-generation quantum-resistant blockchain infrastructure."
+    description: "Next-generation quantum-resistant blockchain infrastructure, designed to secure digital assets against future quantum computing threats."
   },
   STL: {
     name: "Stellar Dynamics | Battery Ventures",
     symbol: "STL",
-    description: "Revolutionary DeFi platform powered by advanced stellar mechanics."
+    description: "Revolutionary DeFi platform powered by advanced stellar mechanics, offering innovative financial solutions and liquidity options."
   },
   LAI: {
     name: "Luminary AI | Paradigm X",
     symbol: "LAI",
-    description: "AI-driven decentralized oracle network for smart contracts."
+    description: "AI-driven decentralized oracle network for smart contracts, providing reliable data feeds and enhancing the functionality of blockchain applications."
   },
   NOV: {
     name: "Nova Finance | Lightspeed Alpha",
     symbol: "NOV",
-    description: "Innovative DeFi lending and borrowing protocol."
+    description: "Innovative DeFi lending and borrowing protocol, enabling users to maximize their returns through flexible financial strategies."
   },
   CIP: {
     name: "Cipher Labs | Polychain Capital",
     symbol: "CIP",
-    description: "Privacy-focused blockchain solutions for enterprise."
+    description: "Privacy-focused blockchain solutions for enterprise, ensuring data security and compliance in a decentralized environment."
   }
 };
 
@@ -237,14 +237,8 @@ export default function Market() {
           <Card>
             <CardHeader>
               <CardTitle className="flex justify-between items-center">
-                <span>{token.description}</span>
-                {loadingPrice ? (
-                  <span>Loading...</span>
-                ) : (
-                  <span className="text-2xl font-bold">
-                    ${parseFloat(latestPrice?.price || "0").toFixed(2)}
-                  </span>
-                )}
+                <span>{token.description} This token represents a unique opportunity in the market, offering innovative solutions and robust technology.</span>
+                  {/* Price display removed */}
               </CardTitle>
             </CardHeader>
           </Card>
