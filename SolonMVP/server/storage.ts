@@ -191,9 +191,6 @@ export class MemStorage implements IStorage {
       });
     }
 
-    const logoPath = path.join(__dirname, '../client/src/pages/Solon_White_logo.png');
-    const logoData = fs.readFileSync(logoPath).toString('base64');
-
     // Send email to admin
     const info = await transporter.sendMail({
       from: '"Waitlist Notifier" <waitlist@Solon.com>',
