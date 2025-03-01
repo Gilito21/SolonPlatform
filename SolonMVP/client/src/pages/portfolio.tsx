@@ -163,13 +163,17 @@ export default function Portfolio() {
           <CardContent>
             <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <ScatterChart>
+                <BubbleChart>
                   <ResponsiveContainer width="100%" height="100%">
-                    <Scatter
+                    <Bubble
                       data={portfolioData}
                       fill="#8884d8"
-                      shape="circle"
                       name="Token Amount"
+                      dataKey="value"
+                      radius={20}
+
+                      dataKey="value"
+                      radius={20}
                     />
                     <Tooltip
                       formatter={(value: number) => [`$${value.toFixed(2)}`, "Value"]}
@@ -179,7 +183,7 @@ export default function Portfolio() {
                       }}
                     />
                   </ResponsiveContainer>
-                </ScatterChart>
+                </BubbleChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
