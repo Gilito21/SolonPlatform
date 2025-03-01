@@ -2,10 +2,11 @@ body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
+  padding-top: 60px; /* Added padding to prevent overlap with the navigation bar */
 }
 
 header {
-  background-color: #f8f9fa;
+  background-color: #000000;
   padding: 5px; /* Reduced padding for better visibility on mobile */
   text-align: center;
 }
@@ -15,7 +16,7 @@ header {
 }
 
 nav {
-  margin-top: 10px; /* Reduced margin for better visibility on mobile */
+  margin-top: 20px; /* Increased margin for better spacing */
 }
 
 /* Add media queries for mobile optimization */
