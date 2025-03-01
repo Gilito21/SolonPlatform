@@ -53,7 +53,7 @@ nav {
   }
 
   nav a {
-    padding: 8px; /* Reduced padding for better visibility on mobile */
+    padding: 4px; /* Further reduced padding for better visibility on mobile */
     width: 100%;
     text-align: center;
   }
