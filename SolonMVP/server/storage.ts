@@ -205,7 +205,7 @@ export class MemStorage implements IStorage {
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 5px;">
           <h2 style="color: #333; text-align: center;">New Waitlist Signup!</h2>
           <p style="font-size: 16px; line-height: 1.5;">Someone new has joined your waitlist:</p>
-          <div style="background-color:rgb(3, 11, 61); padding: 15px; border-radius: 4px; margin: 20px 0;">
+          <div style="background-color:rgb(255, 255, 255); padding: 15px; border-radius: 4px; margin: 20px 0;">
             <p style="font-size: 18px; font-weight: bold; margin: 0; word-break: break-all;">${subscriberEmail}</p>
           </div>
           <p style="font-size: 14px; color: #777; text-align: center; margin-top: 30px;">
@@ -222,9 +222,9 @@ export class MemStorage implements IStorage {
       subject: "Thank you for joining our waitlist 🚀",
       text: `We will notify you as soon as Solon goes live: ${subscriberEmail}`,
       html: `
-        <div style="font-family: Arial, sans-serif; background-color:rgb(3, 11, 61); padding: 40px; text-align: center;">
-          <h1 style="color: #333; margin-bottom: 20px;">Welcome to Solon: the world's best secondary market for private companies</h1>
-          <p style="font-size: 16px; color: #555; margin-bottom: 30px;">
+        <div style="font-family: Arial, sans-serif; background-color:rgb(1, 5, 28); padding: 40px; text-align: center;">
+          <h1 style="color: #fff; margin-bottom: 20px;">Welcome to Solon: the world's best secondary market for private companies</h1>
+          <p style="font-size: 16px; color: #fff; margin-bottom: 30px;">
             Thank you for joining our waitlist. We’re thrilled to have you on board!
           </p>
           <div style="background: #fff; padding: 20px; display: inline-block; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 30px;">
@@ -232,7 +232,7 @@ export class MemStorage implements IStorage {
               <img src="data:image/png;base64,${logoData}" alt="Solon Logo" style="width: 200px; height: auto;" />
             </a>
           </div>
-          <p style="font-size: 14px; color: #888;">
+          <p style="font-size: 14px; color: #fff;">
             We’ll let you know as soon as Solon goes live. In the meantime, keep an eye out!
           </p>
           <!-- Optional button or call to action -->
@@ -242,7 +242,7 @@ export class MemStorage implements IStorage {
           >
             Visit Our Website
           </a>
-          <p style="margin-top: 40px; font-size: 12px; color: #aaa;">
+          <p style="margin-top: 40px; font-size: 12px; color: #fff;">
             This is an automated message from Solon. We’re excited to have you with us!
           </p>
         </div>
