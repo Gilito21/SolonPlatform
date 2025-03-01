@@ -5,6 +5,7 @@ import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query"; // Importing useQuery for portfolio data
 
 export default function Home() {
   interface LatestPrice {
@@ -12,6 +13,8 @@ export default function Home() {
   }
 
   const { data: latestPrice } = useQuery<LatestPrice>({
+  const { data: portfolio } = useQuery({
+    queryKey: ["/api/portfolio"],
     queryKey: ["/api/prices/latest"],
   });
 
@@ -70,6 +73,9 @@ export default function Home() {
     <div className="container mx-auto p-4 max-w-4xl">
       <div className="mb-6">
         <h1 className="text-3xl font-bold mb-2">Token Market</h1>
+        <p className="text-muted-foreground">
+          <span className="opacity-70 mr-1">Cash:</span> ${portfolio?.balance?.toFixed(2) || "0.00"} // Displaying cash balance
+        </p>
         <p className="text-muted-foreground">
           Explore and trade the most innovative startups in the ecosystem, backed by world renowned Venture Capitals
         </p>
