@@ -193,6 +193,23 @@ export default function Portfolio() {
     );
   };
 
+  // Custom Tooltip Component for better display of token information
+  const CustomTooltip = (props: any) => {
+    const { active, payload } = props;
+    
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-card border border-border p-3 rounded-md shadow-lg">
+          <p className="text-lg font-bold">{data.name}</p>
+          <p className="text-sm">Quantity: {data.quantity.toFixed(2)}</p>
+          <p className="text-sm">Value: ${data.value.toFixed(2)}</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div>
       {/* Spacer div to prevent overlap with the header */}
@@ -266,23 +283,8 @@ export default function Portfolio() {
                   <XAxis type="number" dataKey="x" name="X" unit="" tick={false} domain={[0, 1]} />
                   <YAxis type="number" dataKey="y" name="Y" unit="" tick={false} domain={[0, 1]} />
                   <ZAxis type="number" dataKey="value" name="Value" range={[100, sizeFactor]} />
-                  <Tooltip
-                    formatter={(value: any, name: any, props: any) => {
-                      if (name === "value") {
-                        return [`$${value.toFixed(2)}`, "Value"];
-                      }
-                      if (name === "quantity") {
-                        return [props.payload.quantity.toFixed(2), "Quantity"];
-                      }
-                      return value;
-                    }}
-                    labelFormatter={(label: any) => `Token: ${label}`}
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--background))",
-                      border: "1px solid hsl(var(--border))",
-                      color: "white", // Set text color to white
-                    }}
-                  />
+                  {/* Using the custom tooltip component */}
+                  <Tooltip content={<CustomTooltip />} />
                   <Legend content={CustomLegend} />
                   <Scatter
                     name="Tokens"
