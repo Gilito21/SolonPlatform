@@ -55,7 +55,8 @@ export default function Waitlist() {
   };
   
   return (
-    <div className="main-content container mx-auto p-4 flex flex-col items-center justify-center min-h-[80vh] bg-[rgb(1,5,28)] text-white">
+      <div className="main-content container mx-auto p-4 flex flex-col items-center justify-center min-h-[80vh] bg-black text-white">
+
       <div className="max-w-3xl text-center mb-8">
         <h1 className="text-4xl font-bold mb-4 flex items-center justify-center space-x-4">
           <span>Welcome to</span>

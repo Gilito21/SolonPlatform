@@ -5,44 +5,54 @@ import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 
+const { data: latestPrice } = useQuery({
+  queryKey: ["/api/prices/latest"],
+});
+
+export default function Home() {
+
 const mockTokens = [
   {
     name: "Nexus Protocol | Andreessen Horowitz",
     symbol: "NXP",
-    price: 102.45,
-    change: 5.2,
+    price: parseFloat(latestPrice?.price || "0"), // Update with actual price
   },
   {
     name: "Quantum Edge | Sequoia Capital",
     symbol: "QTE",
-    price: 101.30,
+    price: parseFloat(latestPrice?.price || "0"), // Update with actual price
     change: -2.1,
   },
   {
     name: "Stellar Dynamics | Battery Ventures",
     symbol: "STL",
-    price: 92.90,
+    price: parseFloat(latestPrice?.price || "0"), // Update with actual price
     change: 3.8,
   },
   {
     name: "Luminary AI | Paradigm X",
     symbol: "LAI",
-    price: 105.75,
+    price: parseFloat(latestPrice?.price || "0"), // Update with actual price
     change: 1.5,
   },
   {
     name: "Nova Finance | Lightspeed Alpha",
     symbol: "NOV",
-    price: 94.10,
+    price: parseFloat(latestPrice?.price || "0"), // Update with actual price
     change: -0.5,
   },
   {
     name: "Cipher Labs | Polychain Capital",
     symbol: "CIP",
-    price: 95.00,
+    price: parseFloat(latestPrice?.price || "0"), // Update with actual price
     change: 4.0,
   },
-];
+};
+
+const currentPrice = parseFloat(latestPrice?.price || "0");
+mockTokens.forEach(token => {
+  if (token.symbol === "NXP") token.price = currentPrice; // Update price for NXP
+});
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -91,7 +101,7 @@ export default function Home() {
                   </div>
                 </Link>
                 <div className="text-right">
-                  <p className="text-xl font-bold">${token.price}</p>
+                  <p className="text-xl font-bold">${token.price.toFixed(2)}</p>
                   <div className="flex items-center gap-1">
                     {token.change >= 0 ? (
                       <ArrowUpRight className="h-4 w-4 text-green-500" />
