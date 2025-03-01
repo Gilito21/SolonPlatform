@@ -1,8 +1,8 @@
-import { Button } from "components/ui/button";
-import { Card, CardContent } from "components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "wouter";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
-import { Input } from "components/ui/input";
+import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
