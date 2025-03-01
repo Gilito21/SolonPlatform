@@ -1,14 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import Modal from "@/components/Modal";
 import logo from './Solon_White_logo.png';
 
 export default function Waitlist() {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    setIsModalOpen(true);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,12 +62,16 @@ export default function Waitlist() {
   
   return (
     <div className="container mx-auto p-4 flex flex-col items-center justify-center min-h-[80vh]">
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <h2 className="text-xl font-bold mb-4">For better mobile experience</h2>
+        <p>Rotate your device for landscape view.</p>
+      </Modal>
       <div className="max-w-3xl text-center mb-8">
         <h1 className="text-4xl font-bold mb-4">
           Welcome to <img src={logo} alt="Solon Logo" className="inline h-10" />
         </h1>
         <p className="text-xl mb-6">
-          The first platform that transforms shares from startups backed by prestigious Venture Capitals into tradable tokens. (For better mobile experience rotate your device for landscape view)
+          The first platform that transforms shares from startups backed by prestigious Venture Capitals into tradable tokens.
         </p>
         <div className="bg-muted p-6 rounded-lg text-left mb-8">
           <h2 className="text-2xl font-semibold mb-3">How It Works</h2>
