@@ -1,60 +1,64 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "components/ui/button";
+import { Card, CardContent } from "components/ui/card";
 import { Link } from "wouter";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Input } from "components/ui/input";
 import { useState } from "react";
-
-const { data: latestPrice } = useQuery({
-  queryKey: ["/api/prices/latest"],
-});
+import { useQuery } from "@tanstack/react-query";
 
 export default function Home() {
+  interface LatestPrice {
+    price: string;
+  }
 
-const mockTokens = [
-  {
-    name: "Nexus Protocol | Andreessen Horowitz",
-    symbol: "NXP",
-    price: parseFloat(latestPrice?.price || "0"), // Update with actual price
-  },
-  {
-    name: "Quantum Edge | Sequoia Capital",
-    symbol: "QTE",
-    price: parseFloat(latestPrice?.price || "0"), // Update with actual price
-    change: -2.1,
-  },
-  {
-    name: "Stellar Dynamics | Battery Ventures",
-    symbol: "STL",
-    price: parseFloat(latestPrice?.price || "0"), // Update with actual price
-    change: 3.8,
-  },
-  {
-    name: "Luminary AI | Paradigm X",
-    symbol: "LAI",
-    price: parseFloat(latestPrice?.price || "0"), // Update with actual price
-    change: 1.5,
-  },
-  {
-    name: "Nova Finance | Lightspeed Alpha",
-    symbol: "NOV",
-    price: parseFloat(latestPrice?.price || "0"), // Update with actual price
-    change: -0.5,
-  },
-  {
-    name: "Cipher Labs | Polychain Capital",
-    symbol: "CIP",
-    price: parseFloat(latestPrice?.price || "0"), // Update with actual price
-    change: 4.0,
-  },
-};
+  const { data: latestPrice } = useQuery<LatestPrice>({
+    queryKey: ["/api/prices/latest"],
+  });
 
-const currentPrice = parseFloat(latestPrice?.price || "0");
-mockTokens.forEach(token => {
-  if (token.symbol === "NXP") token.price = currentPrice; // Update price for NXP
-});
+  const mockTokens = [
+    {
+      name: "Nexus Protocol | Andreessen Horowitz",
+      symbol: "NXP",
+      price: parseFloat(latestPrice?.price || "0"), // Update with actual price
+      change: 5.2,
+    },
+    {
+      name: "Quantum Edge | Sequoia Capital",
+      symbol: "QTE",
+      price: parseFloat(latestPrice?.price || "0"), // Update with actual price
+      change: -2.1,
+    },
+    {
+      name: "Stellar Dynamics | Battery Ventures",
+      symbol: "STL",
+      price: parseFloat(latestPrice?.price || "0"), // Update with actual price
+      change: 3.8,
+    },
+    {
+      name: "Luminary AI | Paradigm X",
+      symbol: "LAI",
+      price: parseFloat(latestPrice?.price || "0"), // Update with actual price
+      change: 1.5,
+    },
+    {
+      name: "Nova Finance | Lightspeed Alpha",
+      symbol: "NOV",
+      price: parseFloat(latestPrice?.price || "0"), // Update with actual price
+      change: -0.5,
+    },
+    {
+      name: "Cipher Labs | Polychain Capital",
+      symbol: "CIP",
+      price: parseFloat(latestPrice?.price || "0"), // Update with actual price
+      change: 4.0,
+    },
+  ];
 
-export default function Home() {
+  const currentPrice = parseFloat(latestPrice?.price || "0");
+  mockTokens.forEach(token => {
+    if (token.symbol === "NXP") token.price = currentPrice; // Update price for NXP
+  });
+
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredTokens = mockTokens.filter(token => 
@@ -75,7 +79,7 @@ export default function Home() {
         <Input
           placeholder="Search tokens by name or symbol..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
           className="max-w-md"
         />
         <Link href="/market">
