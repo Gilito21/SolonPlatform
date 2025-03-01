@@ -68,7 +68,7 @@ export default function Portfolio() {
       
       tokenSymbols.forEach((symbol, index) => {
         // Create some variance in prices based on the symbol (this is just for simulation)
-        const variance = 0.7 + (index * 0.1); // Each token will have a different price
+        const variance = 1.2 + (index * 0.1); // Each token will have a different price
         priceMap[symbol] = basePrice * variance;
       });
       
@@ -264,7 +264,7 @@ export default function Portfolio() {
             />
             <span style={{ fontWeight: '500' }}>{item.name}</span>
             <span style={{ marginLeft: '4px', opacity: '0.8' }}>
-              ({item.quantity.toFixed(2)})
+              ({item.quantity.toFixed(0)})
             </span>
           </li>
         ))}
@@ -281,8 +281,8 @@ export default function Portfolio() {
       return (
         <div className="bg-card border border-border p-3 rounded-md shadow-lg">
           <p className="text-lg font-bold">{data.name}</p>
-          <p className="text-sm">Quantity: {data.quantity.toFixed(2)}</p>
-          <p className="text-sm">Value: ${data.value.toFixed(2)}</p>
+          <p className="text-sm">Quantity: {data.quantity.toFixed(0)}</p>
+          <p className="text-sm">Value: ${data.value.toFixed(0)}</p>
           <p className="text-xs text-muted-foreground mt-1">
             {(data.value / totalPortfolioValue * 100).toFixed(1)}% of portfolio
           </p>
