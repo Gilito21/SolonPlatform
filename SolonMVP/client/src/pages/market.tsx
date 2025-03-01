@@ -237,7 +237,7 @@ export default function Market() {
           <Card>
             <CardHeader>
               <CardTitle className="flex justify-between items-center">
-                <span>Token Price</span>
+                <span>{token.description}</span>
                 {loadingPrice ? (
                   <span>Loading...</span>
                 ) : (
@@ -323,8 +323,8 @@ export default function Market() {
                       <FormControl>
                         <Input 
                           type="number" 
-                          step="0.01" 
-                          min="0.01"
+                          step="1" 
+                          min="1"
                           placeholder="Enter amount to trade"
                           {...field}
                         />
