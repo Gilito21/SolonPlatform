@@ -16,15 +16,13 @@ export function Navigation() {
   });
 
   return (
-    <nav className="border-b">
+    <nav className="border-b bg-[rgb(0, 0, 0)] fixed top-0 left-0 right-0 z-50">
       <div className="container mx-auto px-4">
-          <div className="flex h-12 items-center justify-between">
-
+        <div className="flex h-12 items-center justify-between">
           <div className="flex items-center gap-4">
-            <img src={logo} alt="Solon Logo" className="h-8" />
-            <div className="text-xs font-medium bg-muted/50 rounded-md px-2 py-0.5 flex items-center">
-              <span className="opacity-70 mr-1">Cash:</span> ${portfolio?.balance?.toFixed(2) || "0.00"}
-            </div>
+            <Link href="/home">
+              <img src={logo} alt="Solon Logo" className="h-8" />
+            </Link>
           </div>
           <div className="flex gap-8">
             {navigation.map((item) => (

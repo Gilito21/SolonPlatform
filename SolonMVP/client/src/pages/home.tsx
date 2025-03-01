@@ -76,7 +76,7 @@ const { data: portfolio } = useQuery({
       <div className="mb-6">
         <h1 className="text-3xl font-bold mb-2">Token Market</h1>
         <p className="text-muted-foreground">
-          <span className="opacity-70 mr-1">Cash:</span> ${portfolio?.balance?.toFixed(2) || "0.00"} // Displaying cash balance
+          <span className="opacity-70 mr-1">Cash:</span> ${portfolio?.balance?.toFixed(2) || "0.00"}
         </p>
         <p className="text-muted-foreground">
           Explore and trade the most innovative startups in the ecosystem, backed by world renowned Venture Capitals
