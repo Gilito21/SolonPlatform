@@ -151,7 +151,7 @@ export default function Portfolio() {
       );
       setBubbleData(calculatedPositions);
     }
-  }, [portfolioLoading, ordersLoading, priceLoading]);
+  }, [portfolioLoading, ordersLoading, priceLoading, tokenQuantities]);
 
   // 1) Convert to PieChart data (as before)
   const tokenBalances = Object.entries(tokenQuantities).reduce(
