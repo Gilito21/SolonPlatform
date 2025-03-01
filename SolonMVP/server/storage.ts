@@ -228,9 +228,9 @@ export class MemStorage implements IStorage {
             Thank you for joining our waitlist. We’re thrilled to have you on board!
           </p>
           <div style="background: #fff; padding: 20px; display: inline-block; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 30px;">
-            <p style="font-size: 18px; margin: 0; word-wrap: break-word;">
-              <strong>Your email:</strong> ${subscriberEmail}
-            </p>
+            <a href="https://bba-01mw.onrender.com/" style="display: inline-block;">
+              <img src="data:image/png;base64,${logoData}" alt="Solon Logo" style="width: 200px; height: auto;" />
+            </a>
           </div>
           <p style="font-size: 14px; color: #888;">
             We’ll let you know as soon as Solon goes live. In the meantime, keep an eye out!
