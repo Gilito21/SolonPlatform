@@ -227,14 +227,6 @@ export class MemStorage implements IStorage {
           <p style="font-size: 16px; color: #fff; margin-bottom: 30px;">
             Thank you for joining our waitlist. We’re thrilled to have you on board!
           </p>
-          <div style="background: #fff; padding: 20px; display: inline-block; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 30px;">
-            <a href="https://bba-01mw.onrender.com/" style="display: inline-block;">
-              <img src="data:image/png;base64,${logoData}" alt="Solon Logo" style="width: 200px; height: auto;" />
-            </a>
-          </div>
-          <p style="font-size: 14px; color: #fff;">
-            We’ll let you know as soon as Solon goes live. In the meantime, keep an eye out!
-          </p>
           <!-- Optional button or call to action -->
           <a 
             href="https://bba-01mw.onrender.com/" 
@@ -242,6 +234,9 @@ export class MemStorage implements IStorage {
           >
             Visit Our Website
           </a>
+          <p style="font-size: 14px; color: #fff;">
+            We’ll let you know as soon as Solon goes live. In the meantime, keep an eye out!
+          </p>
           <p style="margin-top: 40px; font-size: 12px; color: #fff;">
             This is an automated message from Solon. We’re excited to have you with us!
           </p>
