@@ -1,20 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import Modal from "@/components/Modal";
 import logo from './Solon_White_logo.png';
 
 export default function Waitlist() {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  useEffect(() => {
-    setIsModalOpen(true);
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,10 +56,6 @@ export default function Waitlist() {
   
   return (
     <div className="container mx-auto p-4 flex flex-col items-center justify-center min-h-[80vh]">
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <h2 className="text-xl font-bold mb-4">For better mobile experience</h2>
-        <p>Rotate your device for landscape view.</p>
-      </Modal>
       <div className="max-w-3xl text-center mb-8">
         <h1 className="text-4xl font-bold mb-4 flex items-center justify-center space-x-4">
           <span>Welcome to</span>
