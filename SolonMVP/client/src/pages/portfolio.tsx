@@ -215,10 +215,10 @@ export default function Portfolio() {
   );
   
   const getAdjustedSizeRange = () => {
-    const baseSize = 800;
+    const baseSize = 1600;
     const bubbleCount = bubbleData.length;
-    const minSize = Math.max(100, baseSize / (bubbleCount || 1));
-    const maxSize = Math.max(1000, baseSize * 2 / (bubbleCount || 1));
+    const minSize = Math.max(200, baseSize / (bubbleCount || 1));
+    const maxSize = Math.max(2000, baseSize * 2 / (bubbleCount || 1));
     
     return [minSize, maxSize];
   };
