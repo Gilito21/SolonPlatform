@@ -161,7 +161,7 @@ export default function Market() {
       return;
     }
 
-    if (type === "sell" && (portfolio?.balance || 0) < amount) {
+    if (type === "sell" && tokenQuantity < amount) {
       toast({
         title: "Insufficient balance",
         description: "You don't have enough tokens to sell",
