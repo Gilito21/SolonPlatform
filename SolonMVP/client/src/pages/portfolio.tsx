@@ -215,7 +215,7 @@ export default function Portfolio() {
   );
   
   const getAdjustedSizeRange = () => {
-    const baseSize = 500;
+    const baseSize = 800;
     const bubbleCount = bubbleData.length;
     const minSize = Math.max(100, baseSize / (bubbleCount || 1));
     const maxSize = Math.max(1000, baseSize * 2 / (bubbleCount || 1));
@@ -344,7 +344,7 @@ export default function Portfolio() {
             <CardTitle>Portfolio Bubble Map</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[400px] w-full bg-black rounded-md p-4">
+            <div className="h-[400px] w-full bg-card rounded-md p-4">
               <ResponsiveContainer width="100%" height="100%">
                 <ScatterChart
                   margin={{ top: 20, right: 20, bottom: 10, left: 20 }}
