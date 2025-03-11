@@ -3,8 +3,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "wouter";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { X } from "lucide-react";
 
 interface LatestPrice {
   price: string;
@@ -14,6 +16,17 @@ export default function Home() {
   const { data: portfolio } = useQuery({
     queryKey: ["/api/portfolio"],
   });
+
+  const [showBetaMessage, setShowBetaMessage] = useState(true);
+
+  useEffect(() => {
+    const hasSeenBeta = localStorage.getItem('hasSeenBetaMessage');
+    if (hasSeenBeta) {
+      setShowBetaMessage(false);
+    } else {
+      localStorage.setItem('hasSeenBetaMessage', 'true');
+    }
+  }, []);
 
   const mockTokens = [
     {
@@ -67,6 +80,20 @@ export default function Home() {
       <div style={{ height: '60px' }}></div>
 
       <div className="container mx-auto p-4 max-w-4xl">
+        {showBetaMessage && (
+          <Alert className="mb-6 pr-12 relative">
+            <AlertDescription>
+              Welcome! You're accessing an early stage beta version of our platform. We're continuously working to improve your experience.
+            </AlertDescription>
+            <button 
+              onClick={() => setShowBetaMessage(false)}
+              className="absolute top-4 right-4 hover:opacity-70"
+            >
+              <X size={16} />
+            </button>
+          </Alert>
+        )}
+
         <div className="mb-6">
           <h1 className="text-3xl font-bold mb-2">Token Market</h1>
           <p className="text-muted-foreground">
